@@ -1,47 +1,24 @@
 [project]
-name = "carbon-pledges"
-version = "5.1.0"
+name = "ai-enterprise-workflow"
+version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "accelerate",
-    "aiohttp>=3.13.4", # CVE: CRLF injection, DoS, header bypass (10 fixes)
-    "docling>=2.77.0",
-    "docling-core",
-    "httpx", # direct: sync health-probe of vLLM servers in ingestion.thinker
-    "huggingface-hub",
-    "pymupdf",
-    "langchain",
-    "langchain-community",
-    "langchain-core",
-    "langchain-huggingface>=1.2.2",
-    "langchain-openai>=1.1.14", # CVE: SSRF via DNS rebinding
-    "langchain-text-splitters>=1.1.2", # CVE: HTMLSplitter SSRF redirect bypass
-    "langgraph>=1.0.10",
-    "langsmith>=0.7.31", # CVE: stream events bypass output redaction
-    "lxml>=6.0.4", # vendor cap: inscriptis<6.1; CVE-vfmq-68hx-4jfw not exploitable here (no iterparse usage)
+    "flask>=3.0",
     "numpy>=2.2,<3",
-    "nvidia-ml-py",
-    "openai",
-    "orjson>=3.11.7",
     "pandas<3",
-    "pillow>=12.2.0", # CVE: FITS GZIP decompression bomb
-    "psutil",
-    "pydantic>=2.12.5",
-    "pygments>=2.20.0", # CVE: ReDoS via GUID regex
-    "python-dotenv",
-    "pyvespa>=1.1.0",
-    "pyyaml>=6.0.3",
-    "requests>=2.33.0", # CVE: insecure temp file reuse
-    "torch>=2.1.0",
-    "transformers>=5.0.0",
-    "easyocr>=1.7.2",
+    "scipy>=1.13",
+    "statsmodels>=0.14",
+    "tqdm>=4.66",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_enterprise_workflow"]
 
 # ═══════════════════════════════════════════════════════════ LINTING & FORMATTING ═══ #
 
@@ -83,9 +60,6 @@ max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D1", "PLR0913", "PLR2004"]
-"workbench/**" = ["E402", "I001", "PLR0912", "PLR0913", "PLR0915", "PLR2004"]
-"debug/**" = ["E402", "I001", "PLR0912", "PLR0913", "PLR0915", "PLR2004"]
-"eval/**" = ["E402", "I001", "PLR0912", "PLR0913", "PLR0915", "PLR2004"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -97,7 +71,7 @@ docstring-code-format = true
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
-include = ["src", "tests", "debug", "eval", "main.py"]
+include = ["src", "tests"]
 # When overriding `exclude`, pyright drops its built-in defaults — re-add them
 # explicitly so __pycache__, dotfiles, and node_modules stay out of analysis.
 exclude = [
@@ -109,54 +83,10 @@ exclude = [
 ]
 
 
-# Tell pyright that src/ is a source root so imports like
-# ``from carbon_pledges.cli import main`` resolve correctly
-# for files outside the src/ tree (e.g. main.py).
 extraPaths = ["src"]
 
 [tool.deptry]
-# Declare the project's own package as first-party so deptry does not
-# flag internal `carbon_pledges.*` imports as transitive third-party deps.
-known_first_party = ["carbon_pledges"]
-
-# Exclude tooling/build paths that are not part of the production package:
-# - `utils/` contains MkDocs/griffe build helpers loaded only by the docs build
-#   pipeline (declared in the `docs` dependency group).
-extend_exclude = ["utils"]
-
-# Modules whose names differ from the distribution name on PyPI.
-[tool.deptry.package_module_name_map]
-nvidia-ml-py = "pynvml"
-pyvespa = "vespa"
-python-dotenv = "dotenv"
-pymupdf = "fitz"
-pyyaml = "yaml"
-pillow = "PIL"
-
-[tool.deptry.per_rule_ignores]
-# Runtime deps loaded dynamically (HF model loading, accelerate hooks,
-# torch backend selection) — imported indirectly via transformers/langchain
-# adapters, so deptry's static scan doesn't see them.
-DEP002 = [
-    "aiohttp",
-    "accelerate",
-    "torch",
-    "transformers",
-    "langchain",
-    "langchain-community",
-    "langchain-huggingface",
-    "langsmith",
-    "lxml",
-    "pygments",
-    "requests",
-    "easyocr",
-]
-
-
-# ══════════════════════════════════════════════════════════════════════ UV CONFIG ═══ #
-
-[tool.uv]
-constraint-dependencies = ["pygments>=2.20.0"]  # CVE-2026-4539e"
+known_first_party = ["ai_enterprise_workflow"]
 
 [dependency-groups]
 lint = [
@@ -166,27 +96,11 @@ lint = [
     "tach>=0.34.1",
 ]
 
-# Minimal dependency set sufficient to run `pytest tests/` in CI without
-# installing the heavy ML stack (torch, transformers, docling, easyocr,
-# pymupdf, huggingface-hub, accelerate). The heavy packages are stubbed at
-# import time by `tests/conftest.py`; this group lists only the real deps
-# that the test suite actually imports.
 test = [
     "pytest>=9.0.3",
     "pytest-mock>=3.14",
     "pytest-cov>=7.0.0",
-    "hypothesis>=6.100",
-    "langchain-core",
-    "langchain-openai>=1.1.14",
-    "pydantic>=2.12.5",
-    "orjson>=3.11.7",
-    "pyyaml>=6.0.3",
-    "numpy>=2.2,<3",
-    "pandas<3",
-    "psutil",
-    "python-dotenv",
     "requests>=2.33.0",
-    "openai",
 ]
 
 dev = [
@@ -196,6 +110,7 @@ dev = [
 ]
 
 jupyter = [
+    "matplotlib>=3.8",
     "ipykernel>=7.2.0",
     "ipywidgets>=8.1.8",
     "jupyterlab>=4.5.5",

@@ -20,9 +20,9 @@ jobs:
       matrix:
         include:
           - name: ruff
-            command: uv run ruff check src/ tests/ debug/
+            command: uv run ruff check src/ tests/
           - name: pyright
-            command: uv run pyright src/ tests/ debug/ main.py
+            command: uv run pyright
           - name: deptry
             command: uv run deptry src/
           - name: tach
@@ -70,14 +70,11 @@ jobs:
           enable-cache: true
 
       - name: Install test dependencies
-        # Install only the light `test` dependency group; the project itself
-        # and its heavy ML deps (torch, transformers, docling, easyocr,
-        # pymupdf, huggingface-hub, accelerate) are NOT installed. The test
-        # suite stubs those packages at import time in `tests/conftest.py`,
-        # and we add `src/` to PYTHONPATH so `carbon_pledges` is importable.
+        # Install the project and its runtime deps together with the test
+        # dependency group so that all imports resolve correctly.
         run: |
           rm -f uv.lock
-          uv sync --only-group test --no-install-project --default-index https://pypi.org/simple
+          uv sync --group test --default-index https://pypi.org/simple
 
       - name: Run pytest
         env:
@@ -87,6 +84,4 @@ jobs:
         # `transformers` packages. They are skipped here to keep the job
         # light; run them locally against a full dev environment.
         run: |
-          uv run --no-sync pytest tests/ -q \
-            --ignore=tests/test_embedder.py \
-            --ignore=tests/test_scoped.py
+          uv run --no-sync pytest tests/ -q
