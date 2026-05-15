@@ -2,6 +2,7 @@
 
 import pandas as pd
 from flask import Flask, jsonify, request
+from flask.typing import ResponseReturnValue
 
 from ai_enterprise_workflow.core.config import DIRECTORY_LOGS
 from ai_enterprise_workflow.forecasting.arima import model
@@ -11,11 +12,19 @@ app.config["DEBUG"] = True
 
 
 @app.route("/predict", methods=["POST"])
-def predict():
+def predict() -> ResponseReturnValue:
     """Run the ARIMA/SARIMA forecast for the given query parameters.
 
     Returns:
         JSON response with ``{"data": result}`` on success, or an error string.
+
+    Notes:
+        Reads query parameters from the request:
+
+        - ``date`` (required): forecast origin date (``YYYY-MM-DD``).
+        - ``duration`` (optional): number of days to forecast; defaults to
+          ``30``.
+        - ``country`` (optional): country name; omit for global totals.
     """
     # Check date parameter in request
     if "date" in request.args:
@@ -37,11 +46,17 @@ def predict():
 
 
 @app.route("/logs", methods=["POST"])
-def logs():
+def logs() -> ResponseReturnValue:
     """Return the requested log file as JSON.
 
     Returns:
         JSON response with ``{"data": log_rows}`` on success, or an error string.
+
+    Notes:
+        Reads query parameters from the request:
+
+        - ``type`` (required): log category; one of ``"ingest"``,
+          ``"train"``, or ``"predict"``.
     """
     if "type" in request.args:
         log_type = request.args["type"]
