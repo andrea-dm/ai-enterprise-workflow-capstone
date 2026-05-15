@@ -1,24 +1,30 @@
 {
-  "typeCheckingMode": "standard",
+  "typeCheckingMode": "strict",
   "useLibraryCodeForTypes": true,
-  "include": ["src", "tests"],
-	"exclude": [
-		".venv",
-		"**/__pycache__",
-		"**/node_modules",
-		"**/.*",
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    ".venv",
+    "**/__pycache__",
+    "**/node_modules",
+    "**/.*",
     "nb"
-	],
+  ],
   "executionEnvironments": [
     {
       "root": "tests",
-      "extraPaths": ["./src"],
-      "reportUnknownMemberType": false,
+      "extraPaths": [
+        "./src"
+      ],
       "reportPrivateUsage": false
     },
     {
       "root": ".",
-      "extraPaths": ["./src"]
+      "extraPaths": [
+        "./src"
+      ]
     }
   ]
 }
