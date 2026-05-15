@@ -9,7 +9,7 @@ scope: docker-flask-production-hardening
 lock: null
 mr: "!6"
 mr_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/6
-status: in-review
+status: done
 ---
 
 # Harden Docker image and Flask service for production readiness
@@ -640,7 +640,7 @@ Insert inside `class TestUnit`, after `test_logs_invalid_type_returns_error_stri
 | 6 | Phase 6 — Volume mounts in `start.sh` | @ProjectDeveloper | done | Three `-v` bind-mount flags added; `bash -n` syntax check PASS. |
 | 7 | Documentation pass | @DocsReviewer | done | Targeted review: healthz() + flask_client + TestApi docstrings updated; Examples added to predict/logs/healthz; AAA comments in all 9 tests; ruff check+format clean. |
 | 8 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | First run: NO-GO (G2+G3 E501/format in tests/core/test_logging.py — new finding). @LinterSpecialist fixed. Re-run: GO — G0-G5 all PASS, 21/21 tests, 0 pyright errors. G6 skipped (tach broken, pre-existing). |
-| 9 | MR preparation | @ProjectDeveloper | done | 10 split commits pushed; PR #6 opened targeting develop — https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/6 |
+| 9 | MR preparation | @ProjectDeveloper | done | 10 split commits pushed; PR #6 opened targeting develop — https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/6. Merged 2026-05-15T22:21:27Z, merge commit 5939cedb. Issue #5 closed. |
 
 ## Acceptance criteria (mirror)
 
@@ -665,6 +665,7 @@ Verbatim from GitHub issue #5:
 |---|---|---|
 | 2026-05-15T00:00:00Z | @ProjectArchitect | Created full-mode manifest: 6 phases, 7 enhancements, 11 decisions. Issue #5, branch 5-harden-docker-flask-production. |
 | 2026-05-15T21:00:00Z | @ProjectDeveloper | Executed phases 1–6; all 12 acceptance criteria ticked; @DocsReviewer targeted review complete; @IntegrationChecker GO (21/21 tests, 0 pyright errors); 10 split commits pushed; PR #6 opened targeting develop. Lock released. |
+| 2026-05-15T22:21:27Z | @ProjectDeveloper | Stage 7 finalization: PR #6 merged (commit 5939cedb); issue #5 closed via gh CLI (auto-close did not trigger — develop is not the default branch); manifest status set to done. |
 
 ## Handover
 
