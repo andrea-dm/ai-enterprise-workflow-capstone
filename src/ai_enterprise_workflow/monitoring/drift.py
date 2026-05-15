@@ -32,7 +32,7 @@ def get_wasserstain_distance(
     wasserstein_data = np.zeros(batch_size)
     for batch in range(batch_size):
         samples = round(0.8 * data.shape[0])
-        subset_indices: npt.NDArray[np.intp] = np.random.choice(
+        subset_indices: npt.NDArray[np.intp] = np.random.choice(  # pyright: ignore[reportUnknownVariableType]
             data.shape[0], samples, replace=True
         )
         data_batch = data[subset_indices, :]
