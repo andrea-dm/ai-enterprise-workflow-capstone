@@ -1,6 +1,6 @@
 """CSV-file event logger for ingestion / training / prediction stages.
 
-Note:
+Notes:
     The module name shadows the stdlib ``logging`` package. The module
     deliberately avoids ``import logging`` to keep the shadow harmless.
 """
@@ -8,12 +8,18 @@ Note:
 import csv
 import os
 import uuid
+from collections.abc import Mapping
 from datetime import datetime
 
 from ai_enterprise_workflow.core.config import DIRECTORY_LOGS, VERSION
 
 
-def log_common(log_file, log_data, headers, directory_logs):  # noqa: ANN001
+def log_common(
+    log_file: str,
+    log_data: list[str],
+    headers: list[str],
+    directory_logs: str,
+) -> None:
     """Append a row to a CSV log file, writing the header row on first write.
 
     Args:
@@ -21,6 +27,11 @@ def log_common(log_file, log_data, headers, directory_logs):  # noqa: ANN001
         log_data: Row values to write.
         headers: Column header names used when creating a new file.
         directory_logs: Directory path where the log file lives.
+
+    Notes:
+        Creates ``directory_logs`` if it does not exist. Opens the log
+        file in append mode, writing the header row only on the first
+        write.
     """
     header = False
     if not os.path.exists(directory_logs):
@@ -34,11 +45,14 @@ def log_common(log_file, log_data, headers, directory_logs):  # noqa: ANN001
         writer.writerow(log_data)
 
 
-def log_ingest(shape):  # noqa: ANN001
+def log_ingest(shape: tuple[int, ...]) -> None:
     """Write an ingestion event to the ingest log.
 
     Args:
         shape: Shape of the ingested dataset.
+
+    Notes:
+        Writes to the ingest log via :func:`log_common`.
     """
     now = datetime.now()
     _id = str(uuid.uuid4())[:8]
@@ -48,14 +62,22 @@ def log_ingest(shape):  # noqa: ANN001
     log_common(log_file, log_data, headers, DIRECTORY_LOGS)
 
 
-def log_train(model, shape, performance, version=VERSION):  # noqa: ANN001
+def log_train(
+    model: str,
+    shape: tuple[int, ...],
+    performance: Mapping[str, object],
+    version: float = VERSION,
+) -> None:
     """Write a training event to the train log.
 
     Args:
         model: Model name or identifier.
         shape: Shape of the training dataset.
         performance: Performance metrics dictionary.
-        version: Package version string.
+        version: Package version number.
+
+    Notes:
+        Writes to the train log via :func:`log_common`.
     """
     now = datetime.now()
     _id = str(uuid.uuid4())[:8]
@@ -65,14 +87,22 @@ def log_train(model, shape, performance, version=VERSION):  # noqa: ANN001
     log_common(log_file, log_data, headers, DIRECTORY_LOGS)
 
 
-def log_predict(model, query, prediction, version=VERSION):  # noqa: ANN001
+def log_predict(
+    model: str,
+    query: Mapping[str, object],
+    prediction: Mapping[str, object],
+    version: float = VERSION,
+) -> None:
     """Write a prediction event to the predict log.
 
     Args:
         model: Model name or identifier.
         query: Query parameters used for the prediction.
         prediction: Prediction output.
-        version: Package version string.
+        version: Package version number.
+
+    Notes:
+        Writes to the predict log via :func:`log_common`.
     """
     now = datetime.now()
     _id = str(uuid.uuid4())[:8]

@@ -68,31 +68,16 @@ convention = "google"
 # Enable reformatting of code snippets in docstrings.
 docstring-code-format = true
 
-[tool.pyright]
-pythonVersion = "3.12"
-typeCheckingMode = "strict"
-include = ["src", "tests"]
-# When overriding `exclude`, pyright drops its built-in defaults — re-add them
-# explicitly so __pycache__, dotfiles, and node_modules stay out of analysis.
-exclude = [
-    ".venv",
-    "./resources",
-    "**/__pycache__",
-    "**/node_modules",
-    "**/.*",
-]
-
-
-extraPaths = ["src"]
-
 [tool.deptry]
 known_first_party = ["ai_enterprise_workflow"]
 
 [dependency-groups]
 lint = [
     "deptry",
+    "pandas-stubs>=3.0.0.260204",
     "pyright[nodejs]>=1.1.409",
     "ruff>=0.15.4",
+    "scipy-stubs>=1.13.0.0",
     "tach>=0.34.1",
 ]
 
@@ -106,7 +91,6 @@ test = [
 dev = [
     { include-group = "lint" },
     { include-group = "test" },
-    "pandas-stubs>=3.0.0.260204",
 ]
 
 jupyter = [

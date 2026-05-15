@@ -1,11 +1,14 @@
 """ARIMA and SARIMA forecasting models for revenue prediction."""
 
+from __future__ import annotations
+
 import os
 import pickle
+from typing import Any
 
 import pandas as pd
-from statsmodels.tsa.api import SARIMAX
-from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.api import SARIMAX  # type: ignore[import-untyped]
+from statsmodels.tsa.arima.model import ARIMA  # type: ignore[import-untyped]
 
 from ai_enterprise_workflow.core.config import (
     DIRECTORY_MODELS,
@@ -15,15 +18,45 @@ from ai_enterprise_workflow.core.logging import log_predict, log_train
 from ai_enterprise_workflow.ingestion.pipeline import ingest
 
 
-def get_revenue_country(revenue, country):
-    """Get daily revenue data for given country"""
+def get_revenue_country(revenue: pd.DataFrame, country: str) -> pd.DataFrame:
+    """Return daily revenue rows filtered to a single country.
+
+    Args:
+        revenue: DataFrame with ``country``, ``date``, and ``revenue`` columns.
+        country: Country name to filter on.
+
+    Returns:
+        DataFrame containing only the ``date`` and ``revenue`` columns for
+        the requested country, with the index reset.
+    """
     return revenue[revenue["country"] == country].reset_index()[["date", "revenue"]]
 
 
-def train_ARIMA_model(data, order, directory_models, country=None):
-    """Train an auto-regressive, integrating, moving-average (ARIMA) model"""
-    arima = ARIMA(data, order=order)
-    arima_model = arima.fit()
+def train_ARIMA_model(
+    data: pd.Series[float],
+    order: tuple[int, int, int],
+    directory_models: str,
+    country: str | None = None,
+) -> Any:
+    """Fit an ARIMA model and persist it to disk.
+
+    Args:
+        data: Time-series of revenue values used for training.
+        order: ARIMA ``(p, d, q)`` order tuple.
+        directory_models: Directory path where the fitted model is saved.
+        country: Optional country suffix appended to the pickle filename.
+            If ``None``, the file is saved as ``arima.pickle``.
+
+    Returns:
+        Fitted ARIMA model instance.
+
+    Notes:
+        Saves the trained model as a pickle file in ``directory_models``.
+        Calls :func:`~ai_enterprise_workflow.core.logging.log_train` to
+        record the training event.
+    """
+    arima: Any = ARIMA(data, order=order)
+    arima_model: Any = arima.fit()
     if country:
         arima_model.save(directory_models + "arima_" + country + ".pickle")
     else:
@@ -32,10 +65,33 @@ def train_ARIMA_model(data, order, directory_models, country=None):
     return arima_model
 
 
-def train_SARIMA_model(data, order, seasonal_order, directory_models, country=None):
-    """Train a seasonal auto-regressive, integrating, moving-average (SARIMA) model"""
-    sarima = SARIMAX(data, order=order, seasonal_order=seasonal_order)
-    sarima_model = sarima.fit()
+def train_SARIMA_model(
+    data: pd.Series[float],
+    order: tuple[int, int, int],
+    seasonal_order: tuple[int, int, int, int],
+    directory_models: str,
+    country: str | None = None,
+) -> Any:
+    """Fit a SARIMA model and persist it to disk.
+
+    Args:
+        data: Time-series of revenue values used for training.
+        order: ARIMA ``(p, d, q)`` non-seasonal order tuple.
+        seasonal_order: Seasonal ``(P, D, Q, s)`` order tuple.
+        directory_models: Directory path where the fitted model is saved.
+        country: Optional country suffix appended to the pickle filename.
+            If ``None``, the file is saved as ``sarima.pickle``.
+
+    Returns:
+        Fitted SARIMA model instance.
+
+    Notes:
+        Saves the trained model as a pickle file in ``directory_models``.
+        Calls :func:`~ai_enterprise_workflow.core.logging.log_train` to
+        record the training event.
+    """
+    sarima: Any = SARIMAX(data, order=order, seasonal_order=seasonal_order)
+    sarima_model: Any = sarima.fit()
     if country:
         sarima_model.save(directory_models + "sarima_" + country + ".pickle")  # type: ignore[union-attr]
     else:
@@ -44,8 +100,33 @@ def train_SARIMA_model(data, order, seasonal_order, directory_models, country=No
     return sarima_model
 
 
-def predict(model, name, start, end, actual=None):
-    """Generate forecasted predictions using trained model"""
+def predict(
+    model: Any,
+    name: str,
+    start: int,
+    end: int,
+    actual: float | None = None,
+) -> tuple[Any, Any]:
+    """Generate in-sample or out-of-sample predictions from a fitted model.
+
+    Args:
+        model: Fitted ARIMA or SARIMA model with a ``predict`` method.
+        name: Model identifier string used when logging the prediction event.
+        start: First index of the prediction range (inclusive).
+        end: Last index of the prediction range (inclusive).
+        actual: Observed revenue over the forecast window, used for comparison
+            logging. Pass ``None`` when actuals are unavailable.
+
+    Returns:
+        A 2-tuple of:
+
+        - ``predictions``: Series of per-period predicted values.
+        - ``predictions_sum``: Scalar sum of all predicted values over the window.
+
+    Notes:
+        Calls :func:`~ai_enterprise_workflow.core.logging.log_predict` to
+        record the query and prediction result.
+    """
     predictions = model.predict(start=start, end=end, dynamic=True)
     predictions_sum = predictions.sum()
     log_predict(
@@ -56,7 +137,7 @@ def predict(model, name, start, end, actual=None):
     return predictions, predictions_sum
 
 
-def model(date, duration=30, country=None):  # noqa: PLR0912
+def model(date: str, duration: int = 30, country: str | None = None) -> dict[str, Any]:  # noqa: PLR0912
     """Run the full ARIMA/SARIMA forecast pipeline for the given date and duration.
 
     Args:
@@ -66,6 +147,13 @@ def model(date, duration=30, country=None):  # noqa: PLR0912
 
     Returns:
         Dictionary with ARIMA and SARIMA prediction results.
+
+    Notes:
+        Reads ``3 revenue_country.csv`` and ``4 revenue_total.csv`` from
+        ``DIRECTORY_OUTPUT``; calls :func:`ingest` first if the latter is
+        absent. Trains and pickles ARIMA and SARIMA models on the first run;
+        subsequent calls load the cached pickles. Writes prediction output
+        to ``5 predictions[_<country>].csv``.
     """
     if not os.path.exists(DIRECTORY_MODELS):
         os.makedirs(DIRECTORY_MODELS)
