@@ -209,6 +209,7 @@ metadata/
 # Data
 data/*
 out/*
+models/
 
 # Test files
 rules/temp.json
