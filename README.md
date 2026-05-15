@@ -4,11 +4,11 @@
 
 Start application.
 ```bash
-uv run python run_app.py
+uv run python run.py
 ```
 Test application.
 ```bash
-uv run python run_tests.py
+uv run pytest tests/
 ```
 Predict future revenue (default is total revenue for next 30 days; add `country` parameter to get revenue for specific country).
 ```bash

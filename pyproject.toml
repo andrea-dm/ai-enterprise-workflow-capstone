@@ -85,6 +85,7 @@ test = [
     "pytest>=9.0.3",
     "pytest-mock>=3.14",
     "pytest-cov>=7.0.0",
+    "hypothesis>=6.150.2",
     "requests>=2.33.0",
 ]
 
