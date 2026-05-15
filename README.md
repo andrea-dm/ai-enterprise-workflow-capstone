@@ -6,11 +6,11 @@ My capstone project submission for the IBM AI Enterprise Workflow course on Cour
 
 Start application.
 ```bash
-python run_app.py
+uv run python run_app.py
 ```
 Test application.
 ```bash
-python run_tests.py
+uv run python run_tests.py
 ```
 Predict future revenue (default is total revenue for next 30 days; add `country` parameter to get revenue for specific country).
 ```bash
@@ -46,13 +46,13 @@ Yes, see `tests/log_test.py`.
 - Can all of the unit tests be run with a single script and do all of the unit tests pass?\
 Yes, run `python run_tests.py`.
 - Is there a mechanism to monitor performance?\
-Yes, see `src/monitor.py` which contains a function to compute the Wasserstein distance metric.
+Yes, see `src/ai_enterprise_workflow/monitoring/drift.py` which contains a function to compute the Wasserstein distance metric.
 - Was there an attempt to isolate the read/write unit tests from production models and logs?\
-Yes, see `src/log.py`.
+Yes, see `src/ai_enterprise_workflow/core/logging.py`.
 - Does the API work as expected? For example, can you get predictions for a specific country as well as for all countries combined?\
 Yes, use `curl --request POST 'http://127.0.0.1/predict?date=2018-11-20'` or `curl --request POST 'http://127.0.0.1/predict?date=2018-11-20&country=Australia'`
 - Does the data ingestion exists as a function or script to facilitate automation?\
-Yes, see `src/ingest.py`.
+Yes, see `src/ai_enterprise_workflow/ingestion/pipeline.py`.
 - Were multiple models compared?\
 Yes, an ARIMA and SARIMA model were compared. Model comparisons are in `nb/results.ipynb`.
 - Did the EDA investigation use visualizations?\
