@@ -201,10 +201,10 @@ def model(date: str, duration: int = 30, country: str | None = None) -> dict[str
                 revenue["revenue"], order, seasonal_order, DIRECTORY_MODELS
             )
 
-    start = revenue.index[revenue["date"] == date].tolist()[0] + 1
+    start = revenue.index[revenue["date"] == date][0] + 1
     end = start + duration
 
-    new_index = set(revenue.index.tolist()) | set(range(start, end))
+    new_index = set(revenue.index) | set(range(start, end))
     revenue = revenue.reindex(sorted(new_index))
 
     actual_result = revenue["revenue"][start:end].sum()

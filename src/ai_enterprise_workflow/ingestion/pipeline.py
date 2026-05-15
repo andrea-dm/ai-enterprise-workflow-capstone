@@ -37,16 +37,16 @@ def get_data(
         Reads all files in ``directory_data`` via ``os.listdir``. Persists the
         combined result to ``0 data.csv`` in ``directory_output``.
     """
-    # Initialise dataframe with desired column names
-    data = pd.DataFrame(columns=keys, dtype=int)
+    # Collect per-file DataFrames then concat once (avoids O(n²) copying)
+    frames: list[pd.DataFrame] = []
     for file_name in tqdm(os.listdir(directory_data)):
         with open(directory_data + file_name) as file:
             # Read JSON into pandas dataframe
             transactions = pd.read_json(file)
         # Rename column names using desired mappings
         transactions.rename(columns=key_names, inplace=True)
-        # Concatenate transactions from file to master dataframe
-        data = pd.concat([data, transactions])
+        frames.append(transactions)
+    data = pd.concat(frames, ignore_index=True)
     # Persist transactions in CSV file
     data.to_csv(directory_output + "0 data.csv", index=False)
     return data
@@ -85,8 +85,8 @@ def clean_data(
     # Replace null with -1
     data.fillna(value=-1, inplace=True)
     # Some features have non-numeric characters; remove those characters from string
-    data["invoice_id"] = data["invoice_id"].apply(_to_digits)
-    data["stream_id"] = data["stream_id"].apply(_to_digits)
+    data["invoice_id"] = [_to_digits(v) for v in data["invoice_id"]]
+    data["stream_id"] = [_to_digits(v) for v in data["stream_id"]]
     # Replace empty strings with -1
     data = data.replace(r"^\s*$", -1, regex=True)
     # Update data types to reduce memory consumption
