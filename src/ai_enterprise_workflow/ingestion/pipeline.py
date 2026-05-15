@@ -2,8 +2,14 @@ import os, re
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from src.config import *
-from src.log import log_ingest
+from ai_enterprise_workflow.core.config import (
+    DIRECTORY_INPUT,
+    DIRECTORY_OUTPUT,
+    keys,
+    key_names,
+    key_types,
+)
+from ai_enterprise_workflow.core.logging import log_ingest
 
 
 def get_data(keys, key_names, directory_data, directory_output):

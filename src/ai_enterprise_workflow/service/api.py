@@ -1,7 +1,7 @@
 import pandas as pd
 from flask import Flask, request, jsonify
-from src.config import *
-from src.model import model
+from ai_enterprise_workflow.core.config import DIRECTORY_LOGS
+from ai_enterprise_workflow.forecasting.arima import model
 
 
 app = Flask(__name__)

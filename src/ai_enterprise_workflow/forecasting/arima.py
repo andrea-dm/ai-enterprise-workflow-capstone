@@ -3,9 +3,12 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from statsmodels.tsa.api import SARIMAX
 from statsmodels.tsa.arima.model import ARIMA
-from src.config import *
-from src.ingest import ingest
-from src.log import log_train, log_predict
+from ai_enterprise_workflow.core.config import (
+    DIRECTORY_MODELS,
+    DIRECTORY_OUTPUT,
+)
+from ai_enterprise_workflow.ingestion.pipeline import ingest
+from ai_enterprise_workflow.core.logging import log_train, log_predict
 
 
 def get_revenue_country(revenue, country):

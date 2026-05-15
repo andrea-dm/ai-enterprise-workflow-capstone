@@ -1,6 +1,13 @@
+"""CSV-file event logger for ingestion / training / prediction stages.
+
+Note:
+    The module name shadows the stdlib ``logging`` package. The module
+    deliberately avoids ``import logging`` to keep the shadow harmless.
+"""
+
 import csv, os, uuid
 from datetime import datetime
-from src.config import VERSION, DIRECTORY_LOGS
+from ai_enterprise_workflow.core.config import VERSION, DIRECTORY_LOGS
 
 
 def log_common(log_file, log_data, headers, directory_logs):
