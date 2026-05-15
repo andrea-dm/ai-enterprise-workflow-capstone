@@ -6,10 +6,10 @@ issue_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/issues/3
 host: github
 repository: andrea-dm/ai-enterprise-workflow-capstone
 scope: slice-2-quality-hardening
-lock: null
+lock: "@ProjectDeveloper-2026-05-15T13:40Z"
 mr: null
 mr_url: null
-status: design
+status: in-progress
 ---
 
 # Restore pyright strict-mode compliance and enable ModelTest in CI
@@ -588,7 +588,7 @@ class ModelTest(unittest.TestCase):
 --- a/pyproject.toml
 +++ b/pyproject.toml
 @@ -68,19 +68,6 @@ docstring-code-format = true
- 
+
 -[tool.pyright]
 -pythonVersion = "3.12"
 -typeCheckingMode = "strict"
@@ -613,14 +613,18 @@ class ModelTest(unittest.TestCase):
 ```diff
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -100,6 +100,7 @@ test = [
- dev = [
-     { include-group = "lint" },
-     { include-group = "test" },
-     "pandas-stubs>=3.0.0.260204",
+@@ -75,6 +75,8 @@ docstring-code-format = true
+ lint = [
+     "deptry",
++    "pandas-stubs>=3.0.0.260204",
+     "pyright[nodejs]>=1.1.409",
+     "ruff>=0.15.4",
 +    "scipy-stubs>=1.13.0.0",
+     "tach>=0.34.1",
  ]
 ```
+
+**Deviation from original:** stubs moved from `dev` to `lint` group (required for strict-mode pyright in CI's `--group lint` environment). Also removed original diff of adding stubs to `dev`.
 
 ### Phase B — `src/ai_enterprise_workflow/core/logging.py`
 
@@ -628,38 +632,38 @@ class ModelTest(unittest.TestCase):
 --- a/src/ai_enterprise_workflow/core/logging.py
 +++ b/src/ai_enterprise_workflow/core/logging.py
 @@ -14,7 +14,7 @@ from ai_enterprise_workflow.core.config import DIRECTORY_LOGS, VERSION
- 
+
 -def log_common(log_file, log_data, headers, directory_logs):  # noqa: ANN001
 +def log_common(log_file: str, log_data: list[str], headers: list[str], directory_logs: str) -> None:
      """Append a row to a CSV log file, writing the header row on first write.
- 
+
      Args:
 @@ -35,7 +35,7 @@ def log_common(log_file, log_data, headers, directory_logs):  # noqa: ANN001
          writer.writerow(log_data)
- 
- 
+
+
 -def log_ingest(shape):  # noqa: ANN001
 +def log_ingest(shape: tuple[int, ...]) -> None:
      """Write an ingestion event to the ingest log.
- 
+
      Args:
 @@ -49,7 +49,7 @@ def log_ingest(shape):  # noqa: ANN001
      log_common(log_file, log_data, headers, DIRECTORY_LOGS)
- 
- 
+
+
 -def log_train(model, shape, performance, version=VERSION):  # noqa: ANN001
 +def log_train(model: str, shape: tuple[int, ...], performance: dict[str, object], version: float = VERSION) -> None:
      """Write a training event to the train log.
- 
+
      Args:
 @@ -66,7 +66,7 @@ def log_train(model, shape, performance, version=VERSION):  # noqa: ANN001
      log_common(log_file, log_data, headers, DIRECTORY_LOGS)
- 
- 
+
+
 -def log_predict(model, query, prediction, version=VERSION):  # noqa: ANN001
 +def log_predict(model: str, query: dict[str, object], prediction: dict[str, object], version: float = VERSION) -> None:
      """Write a prediction event to the predict log.
- 
+
      Args:
 ```
 
@@ -669,7 +673,7 @@ class ModelTest(unittest.TestCase):
 --- a/src/ai_enterprise_workflow/ingestion/pipeline.py
 +++ b/src/ai_enterprise_workflow/ingestion/pipeline.py
 @@ -18,7 +18,7 @@ from ai_enterprise_workflow.core.logging import log_ingest
- 
+
 -def get_data(keys, key_names, directory_data, directory_output):
 +def get_data(keys: tuple[str, ...], key_names: dict[str, str], directory_data: str, directory_output: str) -> pd.DataFrame:
      """Read source data into a tabular data structure"""
@@ -677,8 +681,8 @@ class ModelTest(unittest.TestCase):
      data = pd.DataFrame(columns=keys, dtype=int)
 @@ -32,8 +32,15 @@ def get_data(keys, key_names, directory_data, directory_output):
      return data
- 
- 
+
+
 -def clean_data(data, keys, key_types, directory_output):
 +def _to_digits(value: object) -> str:
 +    """Strip non-digit characters from the string representation of *value*."""
@@ -701,36 +705,36 @@ class ModelTest(unittest.TestCase):
      data = data.replace(r"^\s*$", -1, regex=True)
 @@ -58,21 +65,21 @@ def clean_data(data, keys, key_types, directory_output):
      return data
- 
- 
+
+
 -def prepare_data(data, directory_output):
 +def prepare_data(data: pd.DataFrame, directory_output: str) -> pd.DataFrame:
      """Perform feature transformations to prepare data for model"""
      data = data.copy()
 @@ -79,13 +86,13 @@ def prepare_data(data, directory_output):
      return data
- 
- 
+
+
 -def calculate_revenue_country(data, directory_output):
 +def calculate_revenue_country(data: pd.DataFrame, directory_output: str) -> None:
      """Aggregate individual transactions into daily revenue by country"""
      revenue = data.groupby(["country", "date"])["price"].sum().reset_index()
      revenue.rename(columns={"price": "revenue"}, inplace=True)
      revenue.to_csv(directory_output + "3 revenue_country.csv", index=False)
- 
- 
+
+
 -def calculate_revenue_total(data, directory_output):
 +def calculate_revenue_total(data: pd.DataFrame, directory_output: str) -> None:
      """Aggregate individual transactions into daily total revenue"""
      revenue = data.groupby(["date"])["price"].sum().reset_index()
      revenue.set_index("date", inplace=True)
 @@ -95,7 +102,7 @@ def calculate_revenue_total(data, directory_output):
- 
- 
+
+
 -def ingest(force=False):
 +def ingest(force: bool = False) -> None:
      """Run the full ingestion pipeline, writing processed CSVs to the output directory.
- 
+
      Args:
 ```
 
@@ -741,14 +745,14 @@ class ModelTest(unittest.TestCase):
 +++ b/src/ai_enterprise_workflow/monitoring/drift.py
 @@ -1,8 +1,12 @@
  """Wasserstein-distance drift detection utilities."""
- 
+
 +from typing import Any
 +
  import numpy as np
 +import numpy.typing as npt
  from scipy.stats import wasserstein_distance
- 
- 
+
+
 -def get_wasserstain_distance(data, batch_size=1000, confidence=0.05):  # noqa: ANN001
 +def get_wasserstain_distance(
 +    data: npt.NDArray[np.floating[Any]],
@@ -764,27 +768,27 @@ class ModelTest(unittest.TestCase):
 +++ b/src/ai_enterprise_workflow/forecasting/arima.py
 @@ -1,9 +1,11 @@
  """ARIMA and SARIMA forecasting models for revenue prediction."""
- 
+
 +from typing import Any
 +
  import os
  import pickle
- 
+
  import pandas as pd
 -from statsmodels.tsa.api import SARIMAX
 -from statsmodels.tsa.arima.model import ARIMA
 +from statsmodels.tsa.api import SARIMAX  # type: ignore[import-untyped]
 +from statsmodels.tsa.arima.model import ARIMA  # type: ignore[import-untyped]
- 
+
  from ai_enterprise_workflow.core.config import (
 @@ -17,19 +19,19 @@ from ai_enterprise_workflow.ingestion.pipeline import ingest
- 
+
 -def get_revenue_country(revenue, country):
 +def get_revenue_country(revenue: pd.DataFrame, country: str) -> pd.DataFrame:
      """Get daily revenue data for given country"""
      return revenue[revenue["country"] == country].reset_index()[["date", "revenue"]]
- 
- 
+
+
 -def train_ARIMA_model(data, order, directory_models, country=None):
 +def train_ARIMA_model(data: pd.Series[Any], order: tuple[int, int, int], directory_models: str, country: str | None = None) -> Any:
      """Train an auto-regressive, integrating, moving-average (ARIMA) model"""
@@ -792,8 +796,8 @@ class ModelTest(unittest.TestCase):
      arima_model = arima.fit()
 @@ -41,7 +43,7 @@ def train_ARIMA_model(data, order, directory_models, country=None):
      return arima_model
- 
- 
+
+
 -def train_SARIMA_model(data, order, seasonal_order, directory_models, country=None):
 +def train_SARIMA_model(data: pd.Series[Any], order: tuple[int, int, int], seasonal_order: tuple[int, int, int, int], directory_models: str, country: str | None = None) -> Any:
      """Train a seasonal auto-regressive, integrating, moving-average (SARIMA) model"""
@@ -801,8 +805,8 @@ class ModelTest(unittest.TestCase):
      sarima_model = sarima.fit()
 @@ -54,7 +56,7 @@ def train_SARIMA_model(data, order, seasonal_order, directory_models, country=No
      return sarima_model
- 
- 
+
+
 -def predict(model, name, start, end, actual=None):
 +def predict(model: Any, name: str, start: int, end: int, actual: float | None = None) -> tuple[Any, Any]:
      """Generate forecasted predictions using trained model"""
@@ -810,12 +814,12 @@ class ModelTest(unittest.TestCase):
      predictions_sum = predictions.sum()
 @@ -65,7 +67,7 @@ def predict(model, name, start, end, actual=None):
      return predictions, predictions_sum
- 
- 
+
+
 -def model(date, duration=30, country=None):  # noqa: PLR0912
 +def model(date: str, duration: int = 30, country: str | None = None) -> dict[str, Any]:  # noqa: PLR0912
      """Run the full ARIMA/SARIMA forecast pipeline for the given date and duration.
- 
+
 @@ -86,14 +88,14 @@ def model(date, duration=30, country=None):  # noqa: PLR0912
          if os.path.exists(DIRECTORY_MODELS + "arima_" + country + ".pickle"):
              with open(DIRECTORY_MODELS + "arima_" + country + ".pickle", "rb") as file:
@@ -853,22 +857,22 @@ class ModelTest(unittest.TestCase):
 --- a/src/ai_enterprise_workflow/service/api.py
 +++ b/src/ai_enterprise_workflow/service/api.py
 @@ -2,6 +2,7 @@
- 
+
  import pandas as pd
  from flask import Flask, jsonify, request
 +from flask.typing import ResponseReturnValue
- 
+
  from ai_enterprise_workflow.core.config import DIRECTORY_LOGS
  from ai_enterprise_workflow.forecasting.arima import model
 @@ -13,7 +14,7 @@ app.config["DEBUG"] = True
- 
+
  @app.route("/predict", methods=["POST"])
 -def predict():
 +def predict() -> ResponseReturnValue:
      """Run the ARIMA/SARIMA forecast for the given query parameters.
- 
+
 @@ -38,7 +39,7 @@ def predict():
- 
+
  @app.route("/logs", methods=["POST"])
 -def logs():
 +def logs() -> ResponseReturnValue:
@@ -884,16 +888,16 @@ class ModelTest(unittest.TestCase):
  import unittest
 -from unittest.mock import patch
 +from unittest.mock import MagicMock, patch
- 
+
  import pandas as pd
- 
+
  from ai_enterprise_workflow.service.api import app
 @@ -9,22 +9,22 @@ class AppTest(unittest.TestCase):
 -    def setUp(self):
 +    def setUp(self) -> None:
          app.config["TESTING"] = True
          self.client = app.test_client()
- 
+
      @patch("ai_enterprise_workflow.service.api.model")
 -    def test_01_app_predict_country(self, mock_model):
 +    def test_01_app_predict_country(self, mock_model: MagicMock) -> None:
@@ -902,14 +906,14 @@ class ModelTest(unittest.TestCase):
              "/predict?date=2018-11-20&duration=30&country=Australia"
          )
          assert "data" in response.get_json()
- 
+
      @patch("ai_enterprise_workflow.service.api.model")
 -    def test_02_app_predict_total(self, mock_model):
 +    def test_02_app_predict_total(self, mock_model: MagicMock) -> None:
          mock_model.return_value = {"arima": 1000.0, "sarima": 1100.0}
          response = self.client.post("/predict?date=2018-11-20&duration=30")
          assert "data" in response.get_json()
- 
+
      @patch("ai_enterprise_workflow.service.api.pd.read_csv")
 -    def test_03_app_logs(self, mock_read_csv):
 +    def test_03_app_logs(self, mock_read_csv: MagicMock) -> None:
@@ -1016,37 +1020,37 @@ class ModelTest(unittest.TestCase):
 
 | # | Phase | Owner | Status | Evidence / Notes |
 |---|-------|-------|--------|------------------|
-| 1 | Phase A — Config & stubs gate | @ProjectDeveloper → @LinterSpecialist | not-started | |
-| 2 | Phase B — Annotate `core/logging.py` | @ProjectDeveloper → @LinterSpecialist | not-started | |
-| 3 | Phase C — Annotate `ingestion/pipeline.py` | @ProjectDeveloper → @LinterSpecialist, @CodeReviewer | not-started | |
-| 4 | Phase D — Annotate `monitoring/drift.py` | @ProjectDeveloper → @LinterSpecialist | not-started | |
-| 5 | Phase E — Annotate `forecasting/arima.py` | @ProjectDeveloper → @LinterSpecialist, @CodeReviewer | not-started | |
-| 6 | Phase F — Annotate `service/api.py` | @ProjectDeveloper → @LinterSpecialist | not-started | |
-| 7 | Phase G — Annotate test mock params | @ProjectDeveloper → @LinterSpecialist | not-started | |
-| 8 | Phase H — ModelTest fixture CSVs + unskip | @ProjectDeveloper → @TestDesigner, @CodeReviewer | not-started | |
-| 9 | Phase I — Final gate validation | @ProjectDeveloper → @IntegrationChecker | not-started | |
-| 10 | MR preparation | @ProjectDeveloper | not-started | |
+| 1 | Phase A — Config & stubs gate | @ProjectDeveloper → @LinterSpecialist | done | `pyrightconfig.json` updated by user (strict, removed `reportUnknownMemberType`). `[tool.pyright]` removed from `pyproject.toml`. **Deviation:** `pandas-stubs`+`scipy-stubs` moved from `dev` to `lint` group; CI step changed to `--no-install-project --group lint` (strict mode needs runtime deps present for `reportMissingImports`). Baseline: 242→0 errors. |
+| 2 | Phase B — Annotate `core/logging.py` | @ProjectDeveloper → @LinterSpecialist | done | 4 function signatures annotated; `noqa: ANN001` removed. pyright: 0 errors on file. |
+| 3 | Phase C — Annotate `ingestion/pipeline.py` | @ProjectDeveloper → @LinterSpecialist, @CodeReviewer | done | `_to_digits` helper added, 2 lambdas replaced, 6 functions annotated. pyright: 0 errors on file. |
+| 4 | Phase D — Annotate `monitoring/drift.py` | @ProjectDeveloper → @LinterSpecialist | done | `from typing import Any` + `numpy.typing` added; `get_wasserstain_distance` annotated. `scipy-stubs` resolved stubs automatically (no `type: ignore` needed). pyright: 0 errors on file. |
+| 5 | Phase E — Annotate `forecasting/arima.py` | @ProjectDeveloper → @LinterSpecialist, @CodeReviewer | done | `from typing import Any`, 2x `type: ignore[import-untyped]` on statsmodels. 5 functions annotated; `arima:/sarima:` constructors cast to `Any`. pyright: 0 errors on file. |
+| 6 | Phase F — Annotate `service/api.py` | @ProjectDeveloper → @LinterSpecialist | done | `ResponseReturnValue` import added; `predict()` and `logs()` annotated. pyright: 0 errors on file. |
+| 7 | Phase G — Annotate test mock params | @ProjectDeveloper → @LinterSpecialist | done | `MagicMock` imported; `setUp` and 3 test methods annotated. pyright: 0 errors on file. |
+| 8 | Phase H — ModelTest fixture CSVs + unskip | @ProjectDeveloper → @TestDesigner, @CodeReviewer | done | Fixture CSVs generated (rng(42), 183 rows, 2018-06-01–2018-11-30). `model_test.py` rewritten with `setUpClass`/`tearDownClass` + `patch`. Both model tests pass. pyright: 0 errors on file. |
+| 9 | Phase I — Final gate validation | @ProjectDeveloper → @IntegrationChecker | done | Ruff: 9 E501 fixed. Tach: OK. pyright (conda env): 0 errors. Deviation: pandas-stubs + scipy-stubs moved to `lint` group; CI step changed from `--only-group lint` to `--no-install-project --group lint`. DocsReviewer: all 7 changed files audited; docstrings + AAA comments applied; ruff/pyright still clean. @IntegrationChecker gate: G1-G6 all GO. 8/8 tests pass. |
+| 10 | MR preparation | @ProjectDeveloper | in-progress | |
 
 ## Acceptance criteria (mirror)
 
 No GitLab issue supplied; criteria mirrored from GitHub issue #3 and the approved user request.
 
-- [ ] `pyrightconfig.json` has `"typeCheckingMode": "strict"`; `pyright` reports 0 errors, 0 warnings.
-- [ ] `[tool.pyright]` section is removed from `pyproject.toml`.
-- [ ] All public functions in `core/logging.py`, `ingestion/pipeline.py`, `forecasting/arima.py`, `monitoring/drift.py`, `service/api.py` carry full type annotations (params + return type).
-- [ ] `scipy-stubs>=1.13.0.0` is added to `[dependency-groups].dev` in `pyproject.toml`.
-- [ ] `statsmodels` imports in `forecasting/arima.py` carry exactly `# type: ignore[import-untyped]`; no other `# type: ignore` suppressions added beyond those already present.
-- [ ] `ingestion/pipeline.py` replaces the two `apply(lambda x: re.sub(…))` calls with a named `_to_digits(value: object) -> str` private helper.
-- [ ] `service/api.py` route functions return `ResponseReturnValue` (from `flask.typing`).
-- [ ] `tests/app_test.py` mock parameters typed as `MagicMock`; all test methods have `-> None`.
-- [ ] `pyrightconfig.json` `executionEnvironments` entry for `tests/` no longer suppresses `reportUnknownMemberType`.
-- [ ] `tests/fixtures/data/output/4 revenue_total.csv` committed; ≥ 180 rows synthetic daily revenue 2018-06-01 through 2018-11-30 with `date` and `revenue` columns.
-- [ ] `tests/fixtures/data/output/3 revenue_country.csv` committed; `country`, `date`, `revenue` columns.
-- [ ] `ModelTest::test_01_model_train` and `ModelTest::test_02_model_predict` pass in CI; `@unittest.skipIf` guard removed.
-- [ ] `ruff check src/ tests/` and `ruff format --check src/ tests/` exit 0.
-- [ ] `tach check` exits 0.
-- [ ] `pytest tests/ -v` — all tests pass, no skips for model_test.
-- [ ] `CHANGELOG.md` has a new entry documenting the quality hardening changes.
+- [x] `pyrightconfig.json` has `"typeCheckingMode": "strict"`; `pyright` reports 0 errors, 0 warnings.
+- [x] `[tool.pyright]` section is removed from `pyproject.toml`.
+- [x] All public functions in `core/logging.py`, `ingestion/pipeline.py`, `forecasting/arima.py`, `monitoring/drift.py`, `service/api.py` carry full type annotations (params + return type).
+- [x] `scipy-stubs>=1.13.0.0` is added to `[dependency-groups].dev` in `pyproject.toml`. *(Deviation: placed in `lint` group; `dev` includes `lint`, so the package is available in all dev environments.)*
+- [x] `statsmodels` imports in `forecasting/arima.py` carry exactly `# type: ignore[import-untyped]`; no other `# type: ignore` suppressions added beyond those already present.
+- [x] `ingestion/pipeline.py` replaces the two `apply(lambda x: re.sub(…))` calls with a named `_to_digits(value: object) -> str` private helper.
+- [x] `service/api.py` route functions return `ResponseReturnValue` (from `flask.typing`).
+- [x] `tests/app_test.py` mock parameters typed as `MagicMock`; all test methods have `-> None`.
+- [x] `pyrightconfig.json` `executionEnvironments` entry for `tests/` no longer suppresses `reportUnknownMemberType`.
+- [x] `tests/fixtures/data/output/4 revenue_total.csv` committed; ≥ 180 rows synthetic daily revenue 2018-06-01 through 2018-11-30 with `date` and `revenue` columns.
+- [x] `tests/fixtures/data/output/3 revenue_country.csv` committed; `country`, `date`, `revenue` columns.
+- [x] `ModelTest::test_01_model_train` and `ModelTest::test_02_model_predict` pass in CI; `@unittest.skipIf` guard removed.
+- [x] `ruff check src/ tests/` and `ruff format --check src/ tests/` exit 0.
+- [x] `tach check` exits 0.
+- [x] `pytest tests/ -v` — all tests pass, no skips for model_test.
+- [x] `CHANGELOG.md` has a new entry documenting the quality hardening changes.
 
 ## Manifest changelog
 
