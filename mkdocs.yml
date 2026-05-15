@@ -1,8 +1,7 @@
-site_name: Carbon Pledges
+site_name: AI Enterprise Workflow
 site_description: >-
-  Multi-agent LangGraph pipeline for auditing ESG carbon pledge
-  disclosures in bank reports.
-repo_url: https://github.com/anthropic/carbon-pledges
+  Capstone invoice-revenue forecasting service (ARIMA/SARIMA).
+repo_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone
 edit_uri: ""
 
 theme:
