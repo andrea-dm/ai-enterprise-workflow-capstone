@@ -1,5 +1,7 @@
 """Flask REST API exposing the forecasting and logging endpoints."""
 
+import os
+
 import pandas as pd
 from flask import Flask, jsonify, request
 from flask.typing import ResponseReturnValue
@@ -8,7 +10,26 @@ from ai_enterprise_workflow.core.config import DIRECTORY_LOGS
 from ai_enterprise_workflow.forecasting.arima import model
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
+app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "0") == "1"
+
+
+@app.route("/healthz", methods=["GET"])
+def healthz() -> ResponseReturnValue:
+    """Liveness probe endpoint.
+
+    Returns:
+        JSON ``{"status": "ok"}`` with HTTP 200.
+
+    Examples:
+        >>> from ai_enterprise_workflow.service.api import app
+        >>> client = app.test_client()
+        >>> r = client.get("/healthz")
+        >>> r.get_json()
+        {'status': 'ok'}
+        >>> r.status_code
+        200
+    """
+    return jsonify({"status": "ok"})
 
 
 @app.route("/predict", methods=["POST"])
@@ -25,6 +46,16 @@ def predict() -> ResponseReturnValue:
         - ``duration`` (optional): number of days to forecast; defaults to
           ``30``.
         - ``country`` (optional): country name; omit for global totals.
+
+    Examples:
+        >>> from unittest.mock import patch
+        >>> from ai_enterprise_workflow.service.api import app
+        >>> client = app.test_client()
+        >>> target = "ai_enterprise_workflow.service.api.model"
+        >>> with patch(target, return_value={"arima": 1.0}):
+        ...     r = client.post("/predict?date=2019-01-01")
+        >>> "data" in r.get_json()
+        True
     """
     # Check date parameter in request
     if "date" in request.args:
@@ -57,6 +88,18 @@ def logs() -> ResponseReturnValue:
 
         - ``type`` (required): log category; one of ``"ingest"``,
           ``"train"``, or ``"predict"``.
+
+    Examples:
+        >>> from unittest.mock import patch
+        >>> import pandas as pd
+        >>> from ai_enterprise_workflow.service.api import app
+        >>> client = app.test_client()
+        >>> target = "ai_enterprise_workflow.service.api.pd.read_csv"
+        >>> mock_df = pd.DataFrame({"col": [1]})
+        >>> with patch(target, return_value=mock_df):
+        ...     r = client.post("/logs?type=predict")
+        >>> "data" in r.get_json()
+        True
     """
     if "type" in request.args:
         log_type = request.args["type"]
