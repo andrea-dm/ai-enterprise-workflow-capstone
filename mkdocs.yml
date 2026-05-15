@@ -1,0 +1,87 @@
+site_name: Carbon Pledges
+site_description: >-
+  Multi-agent LangGraph pipeline for auditing ESG carbon pledge
+  disclosures in bank reports.
+repo_url: https://github.com/anthropic/carbon-pledges
+edit_uri: ""
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.expand
+    - toc.integrate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src"]
+          options:
+            docstring_style: google
+            members: false
+            show_docstring_examples: false
+            show_signature: false
+            show_source: false
+            show_root_heading: true
+            members_order: source
+            merge_init_into_class: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Overview: getting_started/index.md
+      - Installation: getting_started/installation.md
+      - Quickstart: getting_started/quickstart.md
+  - How To:
+      - Overview: how_to/index.md
+      - Audit: how_to/audit.md
+      - Scoped Audit: how_to/scoped_audit.md
+      - Scoped Two-Pass Flow: how_to/scoped_two_pass.md
+      - Ingestion: how_to/ingestion.md
+      - Context Ingestion: how_to/context_ingestion.md
+      - Download: how_to/download.md
+      - Cleanup: how_to/cleanup.md
+      - Performance Report: how_to/performance_report.md
+      - Deployment: how_to/deployment.md
+      - Pre-flight Checks: how_to/pre_flight_checks.md
+  - Advanced:
+      - Overview: advanced/index.md
+      - Implementation Design: advanced/implementation_design.md
+      - Upstreams: advanced/upstreams.md
+      - Downstreams: advanced/downstreams.md
+      - Workflows: advanced/workflows.md
+      - Reducer Trace Walk-through: advanced/reducer_trace_walkthrough.md
+  - Reference:
+      - Eval Metrics Bibliography: reference/eval_metrics_bibliography.md
+  - API Reference: api_reference.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md

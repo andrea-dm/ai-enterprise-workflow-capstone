@@ -1,0 +1,85 @@
+# =============================================================================
+# Tach — module / package boundaries
+# -----------------------------------------------------------------------------
+# Layering (top → bottom). Higher layers may import lower; lower MUST NOT
+# import higher. `core` is the foundation and is allowed no internal deps.
+#
+#   cli
+#    └─ tasks
+#        ├─ audit       ─┐
+#        ├─ ingestion   ─┤── may use resources, retrieval, core
+#        └─ resources   ─┴── composes embedder/retriever onto ML lifecycles
+#                       └─ retrieval
+#                           └─ core
+#
+# Run:  uv run tach check
+# CI-style lint env: uv sync --locked --only-group lint --no-install-project
+# =============================================================================
+
+source_roots = ["src"]
+exclude = [
+    "tests",
+    "debug",
+    "workbench",
+    "scripts",
+    "notebooks",
+    "backup",
+    "**/__pycache__",
+]
+
+# ---------------------------------------------------------------------------
+# Module declarations (one per top-level subpackage of `carbon_pledges`).
+# `depends_on` lists the ONLY internal modules each may import from.
+# ---------------------------------------------------------------------------
+
+[[modules]]
+path = "carbon_pledges.cli"
+depends_on = [
+    "carbon_pledges.core",
+    "carbon_pledges.tasks",
+]
+
+[[modules]]
+path = "carbon_pledges.tasks"
+depends_on = [
+    "carbon_pledges.core",
+    "carbon_pledges.audit",
+    "carbon_pledges.ingestion",
+    "carbon_pledges.resources",
+    "carbon_pledges.retrieval",
+]
+
+[[modules]]
+path = "carbon_pledges.audit"
+depends_on = [
+    "carbon_pledges.core",
+    "carbon_pledges.resources",
+    "carbon_pledges.retrieval",
+]
+
+[[modules]]
+path = "carbon_pledges.ingestion"
+depends_on = [
+    "carbon_pledges.core",
+    "carbon_pledges.resources",
+    "carbon_pledges.retrieval",
+]
+
+# `resources` composes ML lifecycles on top of retrieval primitives.
+[[modules]]
+path = "carbon_pledges.resources"
+depends_on = [
+    "carbon_pledges.core",
+    "carbon_pledges.retrieval",
+]
+
+[[modules]]
+path = "carbon_pledges.retrieval"
+depends_on = [
+    "carbon_pledges.core",
+]
+
+# `core` is the foundation: no internal dependencies allowed.
+[[modules]]
+path = "carbon_pledges.core"
+depends_on = []

@@ -1,0 +1,30 @@
+{
+  "typeCheckingMode": "strict",
+  "useLibraryCodeForTypes": true,
+  "include": ["src", "tests", "debug", "eval", "main.py"],
+	"exclude": [
+		".venv",
+		"**/__pycache__",
+		"**/node_modules",
+		"**/.*",
+    "resources",
+    "reports",
+    "artifacts",
+    "notebooks",
+    "vespa",
+    "questions",
+    "backup"
+	],
+  "executionEnvironments": [
+    {
+      "root": "tests",
+      "extraPaths": ["./src", "./eval"],
+      "reportUnknownMemberType": false,
+      "reportPrivateUsage": false
+    },
+    {
+      "root": ".",
+      "extraPaths": ["./src", "./eval"]
+    }
+  ]
+}
