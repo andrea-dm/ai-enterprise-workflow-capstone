@@ -9,7 +9,7 @@ scope: slice-2-quality-hardening
 lock: null
 mr: "#4"
 mr_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/4
-status: in-review
+status: done
 ---
 
 # Restore pyright strict-mode compliance and enable ModelTest in CI
@@ -1029,7 +1029,7 @@ class ModelTest(unittest.TestCase):
 | 7 | Phase G — Annotate test mock params | @ProjectDeveloper → @LinterSpecialist | done | `MagicMock` imported; `setUp` and 3 test methods annotated. pyright: 0 errors on file. |
 | 8 | Phase H — ModelTest fixture CSVs + unskip | @ProjectDeveloper → @TestDesigner, @CodeReviewer | done | Fixture CSVs generated (rng(42), 183 rows, 2018-06-01–2018-11-30). `model_test.py` rewritten with `setUpClass`/`tearDownClass` + `patch`. Both model tests pass. pyright: 0 errors on file. |
 | 9 | Phase I — Final gate validation | @ProjectDeveloper → @IntegrationChecker | done | Ruff: 9 E501 fixed. Tach: OK. pyright (conda env): 0 errors. Deviation: pandas-stubs + scipy-stubs moved to `lint` group; CI step changed from `--only-group lint` to `--no-install-project --group lint`. DocsReviewer: all 7 changed files audited; docstrings + AAA comments applied; ruff/pyright still clean. @IntegrationChecker gate: G1-G6 all GO. 8/8 tests pass. |
-| 10 | MR preparation | @ProjectDeveloper | done | PR #4 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/4 — targeting `develop`, labels: `enhancement`, `refactor`, assignee: `andrea-dm`. |
+| 10 | MR preparation | @ProjectDeveloper | done | PR #4 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/4 — targeting `develop`, labels: `enhancement`, `refactor`, assignee: `andrea-dm`. Merged 2026-05-15T20:01:21Z. Issue #3 closed 2026-05-15T20:02:34Z (manual close — PR targeted `develop`, not the default `main` branch). |
 
 ## Acceptance criteria (mirror)
 
@@ -1059,6 +1059,7 @@ No GitLab issue supplied; criteria mirrored from GitHub issue #3 and the approve
 | 2026-05-15T12:45:00Z | @IssueTracker | Created GitHub issue #3 and branch `3-quality-hardening-pyright-strict`; initial manifest scaffold (current state, specification, implementation plan, risks). |
 | 2026-05-15T13:30:00Z | @ProjectArchitect | Added execution context, decisions log (D1–D8), detailed action plan (phases A–I with execution recipes), proposed diffs (8 files), failure playbook (10 entries), roadmap (10 rows), acceptance criteria mirror, and handover. Effort: S×6, M×3. |
 | 2026-05-15T16:00:00Z | @ProjectDeveloper | Executed phases A–I (6 split commits). All 16 ACs ticked. Deviations: stubs moved to `lint` group; CI step updated; arima/sarima constructors cast to `Any`. G1–G6 gate GO. @DocsReviewer pass complete. Opened PR #4 targeting `develop`. Lock released. |
+| 2026-05-15T20:05:00Z | @ProjectDeveloper | Stage 7 post-merge finalization. PR #4 merged at 2026-05-15T20:01:21Z (verified via GitHub API). Issue #3 closed at 2026-05-15T20:02:34Z (manual close — default branch is `main`, PR targeted `develop`). Three CI fix commits added after original MR (`np.random.choice` reportUnknownVariableType in `drift.py`). Status set to `done`. |
 
 ## Handover
 
