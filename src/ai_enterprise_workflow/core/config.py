@@ -1,3 +1,5 @@
+"""Configuration constants for the AI Enterprise Workflow service."""
+
 VERSION = 0.1
 DIRECTORY_INPUT = "./data/input/"
 DIRECTORY_OUTPUT = "./data/output/"

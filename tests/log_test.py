@@ -10,7 +10,7 @@ class LogTest(unittest.TestCase):
         log_file = DIRECTORY_LOGS + "ingest.csv"
         shape = (1000, 10)
         log_ingest(shape)
-        self.assertTrue(os.path.exists(log_file))
+        assert os.path.exists(log_file)
 
     def test_02_log_train(self):
         log_file = DIRECTORY_LOGS + "train.csv"
@@ -18,7 +18,7 @@ class LogTest(unittest.TestCase):
         shape = (1000, 10)
         performance = {"metric": 0.5}
         log_train(model, shape, performance)
-        self.assertTrue(os.path.exists(log_file))
+        assert os.path.exists(log_file)
 
     def test_03_log_predict(self):
         log_file = DIRECTORY_LOGS + "predict.csv"
@@ -26,4 +26,4 @@ class LogTest(unittest.TestCase):
         query = {"date": "2020-01-01", "duration": 30, "country": "Australia"}
         prediction = {"label": 1}
         log_predict(model, query, prediction)
-        self.assertTrue(os.path.exists(log_file))
+        assert os.path.exists(log_file)

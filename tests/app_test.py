@@ -26,7 +26,7 @@ class AppTest(unittest.TestCase):
             + country
         )
         response = requests.post(url)
-        self.assertTrue("data" in response.json())
+        assert "data" in response.json()
 
     def test_02_app_predict_total(self):
         baseUrl = APP_BASE_URL
@@ -35,12 +35,12 @@ class AppTest(unittest.TestCase):
         duration = 30
         url = baseUrl + route + "?" + "date=" + date + "&" + "duration=" + str(duration)
         response = requests.post(url)
-        self.assertTrue("data" in response.json())
+        assert "data" in response.json()
 
     def test_03_app_logs(self):
         baseUrl = APP_BASE_URL
         route = "logs"
-        type = "predict"
-        url = baseUrl + route + "?" + "type=" + type
+        log_type = "predict"
+        url = baseUrl + route + "?" + "type=" + log_type
         response = requests.post(url)
-        self.assertTrue("data" in response.json())
+        assert "data" in response.json()

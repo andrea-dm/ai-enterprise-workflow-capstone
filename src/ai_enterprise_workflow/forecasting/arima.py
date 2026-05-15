@@ -1,3 +1,5 @@
+"""ARIMA and SARIMA forecasting models for revenue prediction."""
+
 import os
 import pickle
 
@@ -15,10 +17,7 @@ from ai_enterprise_workflow.ingestion.pipeline import ingest
 
 def get_revenue_country(revenue, country):
     """Get daily revenue data for given country"""
-    revenue_country = revenue[revenue["country"] == country].reset_index()[
-        ["date", "revenue"]
-    ]
-    return revenue_country
+    return revenue[revenue["country"] == country].reset_index()[["date", "revenue"]]
 
 
 def train_ARIMA_model(data, order, directory_models, country=None):
@@ -38,9 +37,9 @@ def train_SARIMA_model(data, order, seasonal_order, directory_models, country=No
     sarima = SARIMAX(data, order=order, seasonal_order=seasonal_order)
     sarima_model = sarima.fit()
     if country:
-        sarima_model.save(directory_models + "sarima_" + country + ".pickle")
+        sarima_model.save(directory_models + "sarima_" + country + ".pickle")  # type: ignore[union-attr]
     else:
-        sarima_model.save(directory_models + "sarima.pickle")
+        sarima_model.save(directory_models + "sarima.pickle")  # type: ignore[union-attr]
     log_train("sarima", data.shape, {})
     return sarima_model
 
@@ -57,7 +56,17 @@ def predict(model, name, start, end, actual=None):
     return predictions, predictions_sum
 
 
-def model(date, duration=30, country=None):
+def model(date, duration=30, country=None):  # noqa: PLR0912
+    """Run the full ARIMA/SARIMA forecast pipeline for the given date and duration.
+
+    Args:
+        date: Reference date string (YYYY-MM-DD) used as the forecast origin.
+        duration: Number of days to forecast.
+        country: Optional country name; if omitted, totals across all countries.
+
+    Returns:
+        Dictionary with ARIMA and SARIMA prediction results.
+    """
     if not os.path.exists(DIRECTORY_MODELS):
         os.makedirs(DIRECTORY_MODELS)
     if not os.path.exists(DIRECTORY_OUTPUT + "4 revenue_total.csv"):
@@ -107,8 +116,8 @@ def model(date, duration=30, country=None):
     start = revenue.index[revenue["date"] == date].tolist()[0] + 1
     end = start + duration
 
-    new_index = set(revenue.index.tolist()) | set([i for i in range(start, end)])
-    revenue = revenue.reindex(new_index)
+    new_index = set(revenue.index.tolist()) | set(range(start, end))
+    revenue = revenue.reindex(sorted(new_index))
 
     actual_result = revenue["revenue"][start:end].sum()
     revenue["forecast_arima"], arima_result = predict(

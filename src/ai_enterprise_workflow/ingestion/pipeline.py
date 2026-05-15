@@ -1,3 +1,5 @@
+"""Data ingestion pipeline for loading and preprocessing invoice data."""
+
 import os
 import re
 
@@ -89,6 +91,11 @@ def calculate_revenue_total(data, directory_output):
 
 
 def ingest(force=False):
+    """Run the full ingestion pipeline, writing processed CSVs to the output directory.
+
+    Args:
+        force: If True, re-run even when output files already exist.
+    """
     if not os.path.exists(DIRECTORY_OUTPUT):
         os.makedirs(DIRECTORY_OUTPUT)
     if force or not os.path.exists(DIRECTORY_OUTPUT + "4 revenue_total.csv"):

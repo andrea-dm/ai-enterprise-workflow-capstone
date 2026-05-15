@@ -12,7 +12,7 @@ class ModelTest(unittest.TestCase):
         duration = 30
         country = None
         model(date, duration, country)
-        self.assertTrue(os.path.exists(model_file))
+        assert os.path.exists(model_file)
 
     def test_02_model_predict(self):
         key = "arima"
@@ -20,4 +20,4 @@ class ModelTest(unittest.TestCase):
         duration = 30
         country = None
         result = model(date, duration, country)
-        self.assertTrue(key in result)
+        assert key in result

@@ -1,3 +1,5 @@
+"""Flask REST API exposing the forecasting and logging endpoints."""
+
 import pandas as pd
 from flask import Flask, jsonify, request
 
@@ -10,23 +12,22 @@ app.config["DEBUG"] = True
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    """Run the ARIMA/SARIMA forecast for the given query parameters.
+
+    Returns:
+        JSON response with ``{"data": result}`` on success, or an error string.
+    """
     # Check date parameter in request
     if "date" in request.args:
         date = request.args["date"]
     else:
         return "Error: No date parameter was provided."
     # Check country parameter in request
-    if "country" in request.args:
-        country = request.args["country"]
-    else:
-        country = None
+    country = request.args.get("country", None)
     # Check duration parameter in request
     if "duration" in request.args:
         duration = request.args["duration"]
-        if duration == "":
-            duration = 30
-        else:
-            duration = int(duration)
+        duration = 30 if duration == "" else int(duration)
     else:
         duration = 30
     # Call model with parameters
@@ -37,15 +38,20 @@ def predict():
 
 @app.route("/logs", methods=["POST"])
 def logs():
+    """Return the requested log file as JSON.
+
+    Returns:
+        JSON response with ``{"data": log_rows}`` on success, or an error string.
+    """
     if "type" in request.args:
-        type = request.args["type"]
+        log_type = request.args["type"]
     else:
         return "Error: No type parameter was provided."
-    if type == "ingest":
+    if log_type == "ingest":
         logs = pd.read_csv(DIRECTORY_LOGS + "ingest.csv").to_dict()
-    elif type == "train":
+    elif log_type == "train":
         logs = pd.read_csv(DIRECTORY_LOGS + "train.csv").to_dict()
-    elif type == "predict":
+    elif log_type == "predict":
         logs = pd.read_csv(DIRECTORY_LOGS + "predict.csv").to_dict()
     else:
         return "Error: Invalid type parameter was provided."

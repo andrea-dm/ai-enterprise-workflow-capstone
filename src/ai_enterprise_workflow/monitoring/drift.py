@@ -1,8 +1,20 @@
+"""Wasserstein-distance drift detection utilities."""
+
 import numpy as np
 from scipy.stats import wasserstein_distance
 
 
-def get_wasserstain_distance(data, batch_size=1000, confidence=0.05):
+def get_wasserstain_distance(data, batch_size=1000, confidence=0.05):  # noqa: ANN001
+    """Estimate the Wasserstein distance for drift detection via bootstrap sampling.
+
+    Args:
+        data: 2-D array of observations.
+        batch_size: Number of bootstrap iterations.
+        confidence: Confidence level for the two-sided quantile estimate.
+
+    Returns:
+        Scalar estimate of the Wasserstein distance.
+    """
     wasserstein_data = np.zeros(batch_size)
     for batch in range(batch_size):
         samples = int(np.round(0.8 * data.shape[0]))
