@@ -32,6 +32,9 @@ class AppSettings(BaseSettings):
             Override via ``DIRECTORY_LOGS``.
         app_base_url: Base URL for internal API references.
             Override via ``APP_BASE_URL``.
+        drift_threshold: Wasserstein drift score threshold above which
+            ``drift_warning`` is set to ``True`` in the ``/predict`` response.
+            Override via ``DRIFT_THRESHOLD``.
         KEYS: Ordered tuple of canonical invoice column names.
             Not env-configurable (ClassVar).
         KEY_NAMES: Source-to-canonical column name mapping.
@@ -74,6 +77,7 @@ class AppSettings(BaseSettings):
     app_base_url: str = Field(
         default="http://127.0.0.1/", validation_alias="APP_BASE_URL"
     )
+    drift_threshold: float = Field(default=0.1, validation_alias="DRIFT_THRESHOLD")
 
     # ── Schema constants (ClassVar: excluded from Pydantic validation and env) ── #
 
