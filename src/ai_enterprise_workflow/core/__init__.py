@@ -1,1 +1,1 @@
-"""Foundational primitives: configuration constants and event logging."""
+"""Foundational primitives: typed configuration and structured event logging."""

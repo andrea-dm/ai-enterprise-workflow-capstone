@@ -8,6 +8,8 @@ dependencies = [
     "flask>=3.0",
     "numpy>=2.2,<3",
     "pandas<3",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
     "scipy>=1.13",
     "statsmodels>=0.14",
     "tqdm>=4.66",
