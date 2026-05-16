@@ -3,7 +3,7 @@ manifest_version: 1
 branch: 15-notebooks-rename-api-rewire
 issue: 15
 issue_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/issues/15
-status: in-review
+status: done
 scope: "notebooks, config"
 affects:
   - notebooks/analysis.ipynb
@@ -295,9 +295,9 @@ Rename the notebook directory, preserving git history for both `.ipynb` files.
    ```
    Expected: two `renamed:` lines in `git status`, no `deleted:`/`new file:` entries.
 5. **Definition of Done.**
-   - [ ] `nb/` no longer exists.
-   - [ ] `notebooks/analysis.ipynb` and `notebooks/results.ipynb` exist.
-   - [ ] `git log --follow notebooks/analysis.ipynb` shows prior commits (history preserved).
+   - [x] `nb/` no longer exists.
+   - [x] `notebooks/analysis.ipynb` and `notebooks/results.ipynb` exist.
+   - [x] `git log --follow notebooks/analysis.ipynb` shows prior commits (history preserved).
 6. **Delegation directives.** None — mechanical shell command.
 7. **Stop conditions.** If `git status` shows `deleted:` + `new file:` instead of `renamed:`, git rename detection failed. Undo with `git mv notebooks nb` and retry with a `git add -A` approach.
 
@@ -324,10 +324,10 @@ Update four files that reference `nb` or `nb/` with the new `notebooks` path.
    # Expected: no output (all references replaced)
    ```
 5. **Definition of Done.**
-   - [ ] `tach check` exits 0.
-   - [ ] `pyright src/` exits 0.
-   - [ ] `grep -r '"nb"' tach.toml pyrightconfig.json .dockerignore` returns nothing.
-   - [ ] `CHANGELOG.md` line 95 contains `notebooks/` (not `nb/`).
+   - [x] `tach check` exits 0.
+   - [x] `pyright src/` exits 0.
+   - [x] `grep -r '"nb"' tach.toml pyrightconfig.json .dockerignore` returns nothing.
+   - [x] `CHANGELOG.md` line 95 contains `notebooks/` (not `nb/`).
 6. **Delegation directives.** `@LinterSpecialist`: *"Run `tach check` and `pyright src/` after Diffs 1–4. Confirm both exit 0. Attach output."*
 7. **Stop conditions.** Halt if `tach check` fails with a new violation — a config line number may have shifted; re-read `tach.toml` and re-apply.
 
@@ -353,12 +353,12 @@ Replace all 16 original cells with 14 new cells that use the public `src/` API.
    ```
    Expected: `[NbConvertApp] Writing ... notebook(s) to /tmp/analysis_executed.ipynb` with no `ERROR` lines.
 5. **Definition of Done.**
-   - [ ] No cell contains a raw string path (`'../data/output/'` or `"../data/output/"`).
-   - [ ] No cell contains `def get_countries` or `def decompose_data`.
-   - [ ] Cell containing `ingest(force=True)` is present.
-   - [ ] All CSV paths use `cfg.directory_output / "..."`.
-   - [ ] `grep -n "def get_countries\|def decompose_data\|directory_output = " notebooks/analysis.ipynb` returns nothing.
-   - [ ] Notebook executes top-to-bottom without error.
+   - [x] No cell contains a raw string path (`'../data/output/'` or `"../data/output/"`).
+   - [x] No cell contains `def get_countries` or `def decompose_data`.
+   - [x] Cell containing `ingest(force=True)` is present.
+   - [x] All CSV paths use `cfg.directory_output / "..."`.
+   - [x] `grep -n "def get_countries\|def decompose_data\|directory_output = " notebooks/analysis.ipynb` returns nothing.
+   - [x] Notebook executes top-to-bottom without error.
 6. **Delegation directives.** `@DocsReviewer`: *"Read `notebooks/analysis.ipynb`. Verify each Markdown cell heading is accurate. Confirm `ingest(force=True)` and `cfg.directory_output` are used. Flag any raw path strings. Attach review note."*
 7. **Stop conditions.** Halt if `nbconvert --execute` exits non-zero — check whether `data/input/` is populated and `data/output/` is writable. If `ImportError: ai_enterprise_workflow`, confirm the CWD guard fired before `sys.path.insert`.
 
@@ -384,11 +384,11 @@ Replace all 7 original cells with 10 new cells that call `model()` and display t
    ```
    Expected: execution completes (allow up to 15 min for first-run model training); no `ERROR` lines.
 5. **Definition of Done.**
-   - [ ] Cell containing `result = model("2019-10-01", duration=30, country=None)` is present.
-   - [ ] Cell containing `result["drift"]` is present and prints the drift score.
-   - [ ] All CSV paths use `cfg.directory_output / "..."`.
-   - [ ] `grep -n "directory_output = " notebooks/results.ipynb` returns nothing.
-   - [ ] Notebook executes top-to-bottom without error.
+   - [x] Cell containing `result = model("2019-10-01", duration=30, country=None)` is present.
+   - [x] Cell containing `result["drift"]` is present and prints the drift score.
+   - [x] All CSV paths use `cfg.directory_output / "..."`.
+   - [x] `grep -n "directory_output = " notebooks/results.ipynb` returns nothing.
+   - [x] Notebook executes top-to-bottom without error.
 6. **Delegation directives.** `@DocsReviewer`: *"Read `notebooks/results.ipynb`. Verify `model()` is called with the approved args. Confirm drift score display uses `result['drift']` (not `result['drift_score']`). Attach review note."*
 7. **Stop conditions.** Halt if `model()` raises `FileNotFoundError` on revenue CSVs — run `ingest(force=True)` interactively first (Phase I-3 must have written `data/output/`). If model training hangs beyond 15 min, check available memory.
 
@@ -764,7 +764,7 @@ plt.show()
 | 4 | Phase I-4 — rewrite `results.ipynb` | @ProjectDeveloper → @DocsReviewer | done | 10 cells written per Diff 6; no raw paths, `model("2019-10-01", 30, None)` call present, `result["drift"]` correct key used, `cfg.directory_output` used |
 | 5 | Documentation pass | @DocsReviewer | done | PASS — both notebooks, all 5 checks (headings, no raw paths, API usage, CWD guard order, prerequisites note) |
 | 6 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | GO — G0–G6 all pass; 43 tests passed, 0 ruff/pyright/tach violations |
-| 7 | MR preparation | @ProjectDeveloper | done | PR #16 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/16 |
+| 7 | MR preparation | @ProjectDeveloper | done | PR #16 merged 2026-05-16 by andrea-dm; issue #15 closed manually (PR targeted develop, not main) |
 
 **Effort summary:** S×2, M×2 — total estimated complexity: Small-Medium. No XL phases.
 
@@ -774,16 +774,16 @@ plt.show()
 
 *Mirrored verbatim from GitHub issue #15.*
 
-- [ ] `nb/` directory no longer exists; `notebooks/` directory contains both `.ipynb` files.
-- [ ] `tach check` passes with `notebooks/` in the exclude list.
-- [ ] `pyright src/` exits 0 (no regressions).
-- [ ] `notebooks/analysis.ipynb` contains no raw string paths (`'../data/output/'`); all paths use `cfg.directory_output`.
-- [ ] `notebooks/analysis.ipynb` calls `ingest(force=True)` from `ai_enterprise_workflow.ingestion`.
-- [ ] `notebooks/analysis.ipynb` contains no inline function definitions (`def get_countries`, `def decompose_data`).
-- [ ] `notebooks/results.ipynb` calls `model("2019-10-01", duration=30, country=None)` from `ai_enterprise_workflow.forecasting`.
-- [ ] `notebooks/results.ipynb` displays the drift score from `model()` output and compares it to `cfg.drift_threshold`.
-- [ ] Both notebooks contain a `sys.path.insert` cell and a CWD guard cell (`os.chdir` to repo root when kernel starts in `notebooks/`).
-- [ ] `ruff check src/ tests/` exits 0 (no side effects from config changes).
+- [x] `nb/` directory no longer exists; `notebooks/` directory contains both `.ipynb` files.
+- [x] `tach check` passes with `notebooks/` in the exclude list.
+- [x] `pyright src/` exits 0 (no regressions).
+- [x] `notebooks/analysis.ipynb` contains no raw string paths (`'../data/output/'`); all paths use `cfg.directory_output`.
+- [x] `notebooks/analysis.ipynb` calls `ingest(force=True)` from `ai_enterprise_workflow.ingestion`.
+- [x] `notebooks/analysis.ipynb` contains no inline function definitions (`def get_countries`, `def decompose_data`).
+- [x] `notebooks/results.ipynb` calls `model("2019-10-01", duration=30, country=None)` from `ai_enterprise_workflow.forecasting`.
+- [x] `notebooks/results.ipynb` displays the drift score from `model()` output and compares it to `cfg.drift_threshold`.
+- [x] Both notebooks contain a `sys.path.insert` cell and a CWD guard cell (`os.chdir` to repo root when kernel starts in `notebooks/`).
+- [x] `ruff check src/ tests/` exits 0 (no side effects from config changes).
 
 ---
 
@@ -816,3 +816,4 @@ To finalize after merge: `@ProjectDeveloper finalize manifests/15-notebooks-rena
 | 2026-05-16T00:00:00Z | @IssueTracker | Initial scaffold — issue #15, branch created, manifest bootstrapped |
 | 2026-05-16T18:30:00Z | @ProjectArchitect | Fixed scaffold errors (cfg module path D4, drift key D5, CWD/sys.path order D1); added Execution context, Decisions log (D1–D8), Detailed action plan (Phases I-1–I-4 with effort tags and Execution recipes), Proposed diffs (Diffs 1–6), Failure playbook (10 entries), Roadmap, Acceptance criteria mirror, Handover. |
 | 2026-05-16T20:00:00Z | @ProjectDeveloper | Executed Phases I-1–I-4; smoke tests PASS; @DocsReviewer PASS; @IntegrationChecker GO (43 tests, 0 violations); 4 split commits; opened PR #16 targeting develop. Deviation: removed `notebooks/` from `.gitignore` (generic template entry was blocking git add on tracked files — recorded in repo lessons). |
+| 2026-05-16T20:30:00Z | @ProjectDeveloper | Stage 7 finalization: PR #16 verified MERGED (2026-05-16T18:12:08Z, by andrea-dm); issue #15 closed manually (GitHub does not auto-close when PR targets develop); manifest status set to done. |
