@@ -15,6 +15,9 @@ dependencies = [
     "tqdm>=4.66",
 ]
 
+[project.scripts]
+ai_enterprise_workflow = "ai_enterprise_workflow.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

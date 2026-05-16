@@ -32,6 +32,8 @@ path = "ai_enterprise_workflow.cli"
 depends_on = [
     "ai_enterprise_workflow.core",
     "ai_enterprise_workflow.service",
+    "ai_enterprise_workflow.ingestion",
+    "ai_enterprise_workflow.forecasting",
 ]
 
 [[modules]]
