@@ -1,6 +1,5 @@
 """Tests for the Flask REST API endpoints (service.api)."""
 
-from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,26 +9,9 @@ from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from ai_enterprise_workflow.core.config import cfg
-from ai_enterprise_workflow.service.api import app
 
 _MODEL_TARGET = "ai_enterprise_workflow.service.api.model"
 _READ_LOG_TARGET = "ai_enterprise_workflow.service.api._read_log_events"
-
-
-@pytest.fixture
-def flask_client() -> Generator[FlaskClient, None, None]:
-    """Yield a Flask test client with TESTING mode enabled.
-
-    Yields:
-        FlaskClient: a configured Flask test client with ``TESTING=True``.
-
-    Notes:
-        Sets ``app.config["TESTING"]`` to ``True``, which enables Werkzeug
-        error propagation and disables the error handler during testing.
-    """
-    app.config["TESTING"] = True
-    with app.test_client() as client:
-        yield client
 
 
 class TestApi:
