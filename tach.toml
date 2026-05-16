@@ -18,7 +18,7 @@
 source_roots = ["src"]
 exclude = [
     "tests",
-    "nb",
+    "notebooks",
     "**/__pycache__",
 ]
 

@@ -247,7 +247,6 @@ answers/
 workbench/
 checkpoints/
 outputs/
-notebooks/
 backup/
 eval/*
 !eval/README.md
