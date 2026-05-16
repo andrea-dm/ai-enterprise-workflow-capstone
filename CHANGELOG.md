@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.1] — 2026-05-16
+
+### Fixed
+
+- `ingestion/pipeline.py` `clean_data`: replaced `fillna(value=-1, inplace=True)`
+  with `pd.option_context("future.no_silent_downcasting", True)` +
+  `fillna(value=-1).infer_objects(copy=False)` to eliminate the pandas
+  `FutureWarning` on object-dtype downcasting.
+
+### Changed
+
+- `README.md` rewritten to reflect current package surface: `uv sync` install
+  step, four CLI subcommands (`ingest`, `train`, `predict`, `serve`), corrected
+  API port and response shape (includes `drift_warning`), full endpoint table
+  (`/predict`, `/logs`, `/healthz`, `/readyz`), Docker `localhost:3000` note.
+
 ## [0.2.0] — 2026-05-16
 
 ### Added
