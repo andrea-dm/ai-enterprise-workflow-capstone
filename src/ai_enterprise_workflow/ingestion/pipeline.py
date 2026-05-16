@@ -120,7 +120,10 @@ def clean_data(
     # Remove duplicate rows
     data.drop_duplicates(inplace=True)
     # Replace null with -1
-    data.fillna(value=-1, inplace=True)
+    # Rationale: opt-in to future.no_silent_downcasting to suppress the
+    # pandas FutureWarning and make type-inference after fillna explicit.
+    with pd.option_context("future.no_silent_downcasting", True):
+        data = data.fillna(value=-1).infer_objects(copy=False)
     # Some features have non-numeric characters; remove those characters from string
     data["invoice_id"] = [_to_digits(v) for v in data["invoice_id"]]
     data["stream_id"] = [_to_digits(v) for v in data["stream_id"]]
