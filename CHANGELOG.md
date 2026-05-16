@@ -92,7 +92,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Notes
 
-- Notebooks under `nb/` required no edits (verified zero `from src` refs).
+- Notebooks under `notebooks/` required no edits at the time of the slice-1 restructure (verified zero `from src` refs); rewired to use the public API in issue #15.
 - `monitoring/drift.py` retained verbatim; runtime wiring deferred to a later slice.
 ## [5.0.1] — 2026-03-29
 
