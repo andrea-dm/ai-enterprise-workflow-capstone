@@ -100,20 +100,23 @@ class TestApi:
         ) -> None:
             """POST /predict with country returns JSON with 'data' key."""
             # Arrange
-            with patch(_MODEL_TARGET, return_value={"arima": 1000.0, "sarima": 1100.0}):
+            mock_result = {"arima": 1000.0, "sarima": 1100.0, "drift": 0.05}
+            with patch(_MODEL_TARGET, return_value=mock_result):
                 # Act
                 response = flask_client.post(
                     "/predict?date=2018-11-20&duration=30&country=Australia"
                 )
             # Assert
             assert "data" in response.get_json()
+            assert "drift_warning" in response.get_json()
 
         def test_predict_without_country_returns_data_key(
             self, flask_client: FlaskClient
         ) -> None:
             """POST /predict without country returns JSON with 'data' key."""
             # Arrange
-            with patch(_MODEL_TARGET, return_value={"arima": 1000.0, "sarima": 1100.0}):
+            mock_result = {"arima": 1000.0, "sarima": 1100.0, "drift": 0.05}
+            with patch(_MODEL_TARGET, return_value=mock_result):
                 # Act
                 response = flask_client.post("/predict?date=2018-11-20&duration=30")
             # Assert
@@ -181,7 +184,8 @@ class TestApi:
         ) -> None:
             """POST /predict with any duration in [1, 365] returns 'data' key."""
             # Arrange
-            with patch(_MODEL_TARGET, return_value={"arima": 1000.0, "sarima": 1100.0}):
+            mock_result = {"arima": 1000.0, "sarima": 1100.0, "drift": 0.05}
+            with patch(_MODEL_TARGET, return_value=mock_result):
                 # Act
                 response = flask_client.post(
                     f"/predict?date=2018-11-20&duration={duration}"

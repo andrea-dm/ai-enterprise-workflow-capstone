@@ -48,6 +48,7 @@ path = "ai_enterprise_workflow.forecasting"
 depends_on = [
     "ai_enterprise_workflow.core",
     "ai_enterprise_workflow.ingestion",
+    "ai_enterprise_workflow.monitoring",
 ]
 
 [[modules]]

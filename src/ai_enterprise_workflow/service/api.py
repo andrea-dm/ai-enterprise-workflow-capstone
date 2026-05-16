@@ -72,7 +72,9 @@ def predict() -> ResponseReturnValue:
     """Run the ARIMA/SARIMA forecast for the given query parameters.
 
     Returns:
-        JSON response with ``{"data": result}`` on success, or an error string.
+        JSON response with keys ``"data"`` (forecast result dict) and
+        ``"drift_warning"`` (``True`` when the Wasserstein drift score exceeds
+        ``cfg.drift_threshold``) on success, or an error JSON on failure.
 
     Notes:
         Reads query parameters from the request:
@@ -87,7 +89,8 @@ def predict() -> ResponseReturnValue:
         >>> from ai_enterprise_workflow.service.api import app
         >>> client = app.test_client()
         >>> target = "ai_enterprise_workflow.service.api.model"
-        >>> with patch(target, return_value={"arima": 1.0}):
+        >>> mock_ret = {"arima": 1.0, "sarima": 2.0, "drift": 0.05}
+        >>> with patch(target, return_value=mock_ret):
         ...     r = client.post("/predict?date=2019-01-01")
         >>> "data" in r.get_json()
         True
@@ -118,7 +121,9 @@ def predict() -> ResponseReturnValue:
     # Call model with parameters
     result = model(date, duration, country)
     # Return result
-    return jsonify({"data": result})
+    return jsonify(
+        {"data": result, "drift_warning": result["drift"] > cfg.drift_threshold}
+    )
 
 
 def logs() -> ResponseReturnValue:

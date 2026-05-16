@@ -10,9 +10,12 @@ The public entry-point is :func:`model`, which orchestrates data ingestion
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from statsmodels.iolib.smpickle import load_pickle  # type: ignore[import-untyped]
 from statsmodels.tsa.api import SARIMAX  # type: ignore[import-untyped]
@@ -53,7 +56,7 @@ def get_revenue_country(revenue: pd.DataFrame, country: str) -> pd.DataFrame:
     return revenue[revenue["country"] == country].reset_index()[["date", "revenue"]]
 
 
-def train_ARIMA_model(
+def train_arima_model(
     data: pd.Series[float],
     order: tuple[int, int, int],
     directory_models: Path,
@@ -80,7 +83,7 @@ def train_ARIMA_model(
         >>> import pandas as pd, pathlib, tempfile
         >>> data = pd.Series(range(1, 61), dtype=float)
         >>> with tempfile.TemporaryDirectory() as tmp:  # doctest: +SKIP
-        ...     m = train_ARIMA_model(data, (1, 0, 0), pathlib.Path(tmp))
+        ...     m = train_arima_model(data, (1, 0, 0), pathlib.Path(tmp))
     """
     arima: Any = ARIMA(data, order=order)
     arima_model: Any = arima.fit()
@@ -92,7 +95,7 @@ def train_ARIMA_model(
     return arima_model
 
 
-def train_SARIMA_model(
+def train_sarima_model(
     data: pd.Series[float],
     order: tuple[int, int, int],
     seasonal_order: tuple[int, int, int, int],
@@ -121,7 +124,7 @@ def train_SARIMA_model(
         >>> import pandas as pd, pathlib, tempfile
         >>> data = pd.Series(range(1, 61), dtype=float)
         >>> with tempfile.TemporaryDirectory() as tmp:  # doctest: +SKIP
-        ...     m = train_SARIMA_model(
+        ...     m = train_sarima_model(
         ...         data, (1, 0, 0), (0, 1, 1, 12), pathlib.Path(tmp)
         ...     )
     """
@@ -182,7 +185,7 @@ def predict(
     return predictions, predictions_sum
 
 
-def model(date: str, duration: int = 30, country: str | None = None) -> dict[str, Any]:  # noqa: PLR0912
+def model(date: str, duration: int = 30, country: str | None = None) -> dict[str, Any]:
     """Run the full ARIMA/SARIMA forecast pipeline for the given date and duration.
 
     Args:
@@ -191,7 +194,7 @@ def model(date: str, duration: int = 30, country: str | None = None) -> dict[str
         country: Optional country name; if omitted, totals across all countries.
 
     Returns:
-        Dictionary with ARIMA and SARIMA prediction results.
+        Dictionary with ``"arima"``, ``"sarima"``, and ``"drift"`` keys.
 
     Notes:
         Reads ``3 revenue_country.csv`` and ``4 revenue_total.csv`` from
@@ -204,75 +207,117 @@ def model(date: str, duration: int = 30, country: str | None = None) -> dict[str
     Examples:
         >>> result = model("2019-01-01", duration=30)  # doctest: +SKIP
         >>> sorted(result.keys())  # doctest: +SKIP
-        ['arima', 'sarima']
+        ['arima', 'drift', 'sarima']
 
     See Also:
-        :func:`train_ARIMA_model`: Fits and persists the ARIMA model.
-        :func:`train_SARIMA_model`: Fits and persists the SARIMA model.
+        :func:`train_arima_model`: Fits and persists the ARIMA model.
+        :func:`train_sarima_model`: Fits and persists the SARIMA model.
         :func:`predict`: Generates predictions from a fitted model.
         `Workflows — Forecasting Pipeline
         <advanced/workflows.md#forecasting-pipeline>`_:
             End-to-end forecasting workflow walkthrough.
     """
     DIRECTORY_MODELS.mkdir(parents=True, exist_ok=True)
-    if not (DIRECTORY_OUTPUT / "4 revenue_total.csv").exists():
+    revenue, file_suffix = _resolve_revenue(country, DIRECTORY_OUTPUT)
+    return _run_predictions(revenue, date, duration, DIRECTORY_MODELS, file_suffix)
+
+
+def _load_or_train(model_path: Path, train_fn: Callable[[], Any]) -> Any:
+    """Load a persisted model or train a fresh one if the file is absent.
+
+    Args:
+        model_path: Filesystem path to the pickled model file.
+        train_fn: Zero-argument callable that trains and persists the model,
+            returning the fitted model instance.
+
+    Returns:
+        Loaded or freshly trained model instance.
+    """
+    if model_path.exists():
+        return load_pickle(str(model_path))
+    return train_fn()
+
+
+def _resolve_revenue(
+    country: str | None,
+    output_dir: Path,
+) -> tuple[pd.DataFrame, str]:
+    """Resolve the revenue DataFrame and filename suffix for a given country.
+
+    Args:
+        country: Country name filter, or ``None`` for global totals.
+        output_dir: Directory containing the pipeline output CSVs.
+
+    Returns:
+        A 2-tuple of ``(revenue_df, file_suffix)`` where ``file_suffix``
+        is ``""`` for totals or ``"_<country>"`` for a country slice.
+    """
+    if not (output_dir / "4 revenue_total.csv").exists():
         ingest()
-    revenue_countries = pd.read_csv(DIRECTORY_OUTPUT / "3 revenue_country.csv")
-    revenue_total = pd.read_csv(DIRECTORY_OUTPUT / "4 revenue_total.csv")
-
+    revenue_countries = pd.read_csv(output_dir / "3 revenue_country.csv")
+    revenue_total = pd.read_csv(output_dir / "4 revenue_total.csv")
     if country:
-        revenue = get_revenue_country(revenue_countries, country)
-        file_suffix = "_" + country
-    else:
-        revenue = revenue_total
-        file_suffix = ""
+        return get_revenue_country(revenue_countries, country), f"_{country}"
+    return revenue_total, ""
 
-    order = (2, 1, 2)
-    seasonal_order = (2, 1, 2, 30)
 
-    if country:
-        arima_pickle = DIRECTORY_MODELS / f"arima_{country}.pickle"
-        if arima_pickle.exists():
-            arima_model = load_pickle(str(arima_pickle))
-        else:
-            arima_model = train_ARIMA_model(
-                revenue["revenue"], order, DIRECTORY_MODELS, country
-            )
-        sarima_pickle = DIRECTORY_MODELS / f"sarima_{country}.pickle"
-        if sarima_pickle.exists():
-            sarima_model = load_pickle(str(sarima_pickle))
-        else:
-            sarima_model = train_SARIMA_model(
-                revenue["revenue"], order, seasonal_order, DIRECTORY_MODELS, country
-            )
-    else:
-        arima_pickle = DIRECTORY_MODELS / "arima.pickle"
-        if arima_pickle.exists():
-            arima_model = load_pickle(str(arima_pickle))
-        else:
-            arima_model = train_ARIMA_model(revenue["revenue"], order, DIRECTORY_MODELS)
-        sarima_pickle = DIRECTORY_MODELS / "sarima.pickle"
-        if sarima_pickle.exists():
-            sarima_model = load_pickle(str(sarima_pickle))
-        else:
-            sarima_model = train_SARIMA_model(
-                revenue["revenue"], order, seasonal_order, DIRECTORY_MODELS
-            )
+def _run_predictions(
+    revenue: pd.DataFrame,
+    date: str,
+    duration: int,
+    directory_models: Path,
+    file_suffix: str,
+) -> dict[str, Any]:
+    """Load or train ARIMA/SARIMA models and generate predictions.
 
-    start = revenue.index[revenue["date"] == date][0] + 1
-    end = start + duration
+    Args:
+        revenue: Revenue DataFrame with ``date`` and ``revenue`` columns.
+        date: Forecast origin date string (YYYY-MM-DD).
+        duration: Number of forecast periods.
+        directory_models: Directory for persisting and loading model pickles.
+        file_suffix: Filename suffix (``""`` or ``"_<country>"``).
 
+    Returns:
+        Dictionary with ``"arima"``, ``"sarima"``, and ``"drift"`` keys.
+    """
+    from ai_enterprise_workflow.monitoring.drift import (  # noqa: PLC0415
+        get_wasserstein_distance,
+    )
+
+    order: tuple[int, int, int] = (2, 1, 2)
+    seasonal_order: tuple[int, int, int, int] = (2, 1, 2, 30)
+    country: str | None = file_suffix.lstrip("_") or None
+
+    arima_model = _load_or_train(
+        directory_models / f"arima{file_suffix}.pickle",
+        lambda c=country: train_arima_model(  # type: ignore[misc]
+            revenue["revenue"], order, directory_models, c
+        ),
+    )
+    sarima_model = _load_or_train(
+        directory_models / f"sarima{file_suffix}.pickle",
+        lambda c=country: train_sarima_model(  # type: ignore[misc]
+            revenue["revenue"], order, seasonal_order, directory_models, c
+        ),
+    )
+
+    start: int = revenue.index[revenue["date"] == date][0] + 1
+    end: int = start + duration
+    # Capture historical revenue array BEFORE reindexing (avoids NaN in drift)
+    revenue_array: npt.NDArray[np.floating[Any]] = (
+        revenue["revenue"].to_numpy().astype(np.float64).reshape(-1, 1)
+    )
     new_index = set(revenue.index) | set(range(start, end))
     revenue = revenue.reindex(sorted(new_index))
+    actual = revenue["revenue"][start:end].sum()
 
-    actual_result = revenue["revenue"][start:end].sum()
     revenue["forecast_arima"], arima_result = predict(
-        arima_model, "arima", start, end, actual_result
+        arima_model, "arima", start, end, actual
     )
     revenue["forecast_sarima"], sarima_result = predict(
-        sarima_model, "sarima", start, end, actual_result
+        sarima_model, "sarima", start, end, actual
     )
+    revenue.to_csv(DIRECTORY_OUTPUT / f"5 predictions{file_suffix}.csv")
 
-    revenue.to_csv(DIRECTORY_OUTPUT / ("5 predictions" + file_suffix + ".csv"))
-
-    return {"arima": arima_result, "sarima": sarima_result}
+    drift_score = get_wasserstein_distance(revenue_array, batch_size=200)
+    return {"arima": arima_result, "sarima": sarima_result, "drift": float(drift_score)}
