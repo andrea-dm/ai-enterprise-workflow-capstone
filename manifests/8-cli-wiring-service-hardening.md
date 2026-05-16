@@ -3,7 +3,7 @@ manifest_version: 1
 branch: 8-cli-wiring-service-hardening
 issue: 8
 issue_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/issues/8
-status: in-review
+status: done
 scope: "cli, service"
 tests: tests/service/test_api.py
 affects: []
@@ -914,7 +914,7 @@ Add 5 new test methods covering `/readyz` and 422 validation paths.
 | 6 | Phase D-4 — New tests | @ProjectDeveloper → @TestDesigner | done | 14/14 tests pass (5 new) |
 | 7 | Documentation pass | @DocsReviewer | done | Examples+Notes added to 11 functions; ruff ✅ |
 | 8 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | G0-G6 all ✅; 26/26 tests |
-| 9 | MR preparation | @ProjectDeveloper | done | PR #12 → develop; 5 commits |
+| 9 | MR preparation | @ProjectDeveloper | done | PR #12 → develop; merged 2026-05-16T15:08:05Z |
 
 **Effort summary:** S×4, M×1 — total complexity: Small-Medium. No XL phases.
 
@@ -968,3 +968,4 @@ To finalize after merge: `@ProjectDeveloper finalize manifests/8-cli-wiring-serv
 | 2026-05-16T12:00:00Z | @IssueTracker | Initial scaffold — issue #8, branch created, manifest bootstrapped |
 | 2026-05-16T12:30:00Z | @ProjectArchitect | Added Execution context, Decisions log (D1–D5), Detailed action plan (Phases C-1, C-2, D-1–D-4 with effort tags and Execution recipes), Proposed diffs (Diffs 1–5), Failure playbook, Roadmap, Acceptance criteria mirror, Handover. |
 | 2026-05-16 | @ProjectDeveloper | Executed phases C-1–D-4; DocsReviewer pass; IntegrationChecker GO (G0–G6); 5 split commits pushed; opened PR #12 targeting develop; lock released. |
+| 2026-05-16 | @ProjectDeveloper | Stage 7 finalization: PR #12 merged at 2026-05-16T15:08:05Z (verified via gh CLI); status set to done; local branch deleted. |
