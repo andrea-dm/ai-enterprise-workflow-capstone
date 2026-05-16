@@ -50,8 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
-- Project distribution name `carbon-pledges` → `ai-enterprise-workflow`;
-  version reset to `0.1.0`.
 - All internal imports rewritten from `src.*` to absolute
   `ai_enterprise_workflow.*` paths; every `from … import *` removed.
 - Tooling configs (`pyproject.toml`, `tach.toml`, `pyrightconfig.json`,
