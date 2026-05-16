@@ -1,6 +1,7 @@
 """Tests for the Flask REST API endpoints (service.api)."""
 
 from collections.abc import Generator
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -8,6 +9,7 @@ from flask.testing import FlaskClient
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
+from ai_enterprise_workflow.core.config import cfg
 from ai_enterprise_workflow.service.api import app
 
 _MODEL_TARGET = "ai_enterprise_workflow.service.api.model"
@@ -36,6 +38,62 @@ class TestApi:
     @pytest.mark.unit
     class TestUnit:
         """Happy-path and error-path tests for all API routes."""
+
+        def test_readyz_returns_ready_when_csv_exists(
+            self,
+            flask_client: FlaskClient,
+            tmp_path: Path,
+            monkeypatch: pytest.MonkeyPatch,
+        ) -> None:
+            """GET /readyz returns 200 when the sentinel CSV exists."""
+            (tmp_path / "4 revenue_total.csv").touch()
+            monkeypatch.setattr(cfg, "directory_output", tmp_path)
+            response = flask_client.get("/readyz")
+            assert response.status_code == 200
+            assert response.get_json() == {"status": "ready"}
+
+        def test_readyz_returns_503_when_csv_absent(
+            self,
+            flask_client: FlaskClient,
+            tmp_path: Path,
+            monkeypatch: pytest.MonkeyPatch,
+        ) -> None:
+            """GET /readyz returns 503 when the sentinel CSV is absent."""
+            monkeypatch.setattr(cfg, "directory_output", tmp_path)
+            response = flask_client.get("/readyz")
+            assert response.status_code == 503
+            assert response.get_json() == {
+                "status": "not ready",
+                "reason": "data not ingested",
+            }
+
+        def test_predict_invalid_date_returns_422(
+            self, flask_client: FlaskClient
+        ) -> None:
+            """POST /predict with non-ISO date returns HTTP 422."""
+            response = flask_client.post("/predict?date=not-a-date")
+            assert response.status_code == 422
+            assert "error" in response.get_json()
+
+        def test_predict_non_positive_duration_returns_422(
+            self, flask_client: FlaskClient
+        ) -> None:
+            """POST /predict with duration=0 returns HTTP 422."""
+            response = flask_client.post("/predict?date=2019-01-01&duration=0")
+            assert response.status_code == 422
+            assert response.get_json() == {
+                "error": "duration must be a positive integer."
+            }
+
+        def test_predict_non_integer_duration_returns_422(
+            self, flask_client: FlaskClient
+        ) -> None:
+            """POST /predict with non-integer duration returns HTTP 422."""
+            response = flask_client.post("/predict?date=2019-01-01&duration=abc")
+            assert response.status_code == 422
+            assert response.get_json() == {
+                "error": "duration must be a positive integer."
+            }
 
         def test_predict_with_country_returns_data_key(
             self, flask_client: FlaskClient
