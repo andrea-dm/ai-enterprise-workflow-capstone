@@ -4,8 +4,8 @@ branch: 7-upgrade-core-foundation-typed-config-stdlib-logging-security
 issue: 7
 scope: "core config, log_events, ingestion, forecasting, service"
 lock: null
-mr: null
-mr_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/new/7-upgrade-core-foundation-typed-config-stdlib-logging-security
+mr: "!11"
+mr_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/11
 status: in-review
 ---
 
@@ -1620,7 +1620,7 @@ git rm tests/core/test_logging.py
 | 8 | Phase 4 — Test rewrite | @ProjectDeveloper → @TestDesigner, @LinterSpecialist | done | test_log_events.py created; test_logging.py git-rm'd; test_arima.py + test_api.py updated; 19 non-slow tests pass |
 | 9 | Documentation pass | @DocsReviewer | done | 7 docstring items applied; stale core.logging ref fixed; ruff 0 errors; pyright 0 errors |
 | 10 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | GO: G0–G6 all pass; pydantic>=2.0 added as direct dep (G1 fix); ruff format applied to 2 files (G3 fix); 19/19 non-slow tests pass |
-| 11 | MR preparation | @ProjectDeveloper | done | 5 split commits pushed; branch pushed to origin; PR URL: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/new/7-upgrade-core-foundation-typed-config-stdlib-logging-security |
+| 11 | MR preparation | @ProjectDeveloper | done | Draft PR #11 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/11 |
 
 **Effort summary:** S×1, M×3 (Phases 1, 2, 3-combined), L×1 (Phase 4) — total estimated complexity: Medium. No XL phases.
 
