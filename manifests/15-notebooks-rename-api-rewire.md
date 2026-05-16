@@ -3,7 +3,7 @@ manifest_version: 1
 branch: 15-notebooks-rename-api-rewire
 issue: 15
 issue_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/issues/15
-status: in-progress
+status: in-review
 scope: "notebooks, config"
 affects:
   - notebooks/analysis.ipynb
@@ -12,8 +12,8 @@ affects:
   - .dockerignore
   - pyrightconfig.json
   - CHANGELOG.md
-mr: null
-mr_url: null
+mr: "#16"
+mr_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/16
 lock: null
 ---
 
@@ -764,7 +764,7 @@ plt.show()
 | 4 | Phase I-4 — rewrite `results.ipynb` | @ProjectDeveloper → @DocsReviewer | done | 10 cells written per Diff 6; no raw paths, `model("2019-10-01", 30, None)` call present, `result["drift"]` correct key used, `cfg.directory_output` used |
 | 5 | Documentation pass | @DocsReviewer | done | PASS — both notebooks, all 5 checks (headings, no raw paths, API usage, CWD guard order, prerequisites note) |
 | 6 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | GO — G0–G6 all pass; 43 tests passed, 0 ruff/pyright/tach violations |
-| 7 | MR preparation | @ProjectDeveloper | not-started | |
+| 7 | MR preparation | @ProjectDeveloper | done | PR #16 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/16 |
 
 **Effort summary:** S×2, M×2 — total estimated complexity: Small-Medium. No XL phases.
 
@@ -815,3 +815,4 @@ To finalize after merge: `@ProjectDeveloper finalize manifests/15-notebooks-rena
 |---|---|---|
 | 2026-05-16T00:00:00Z | @IssueTracker | Initial scaffold — issue #15, branch created, manifest bootstrapped |
 | 2026-05-16T18:30:00Z | @ProjectArchitect | Fixed scaffold errors (cfg module path D4, drift key D5, CWD/sys.path order D1); added Execution context, Decisions log (D1–D8), Detailed action plan (Phases I-1–I-4 with effort tags and Execution recipes), Proposed diffs (Diffs 1–6), Failure playbook (10 entries), Roadmap, Acceptance criteria mirror, Handover. |
+| 2026-05-16T20:00:00Z | @ProjectDeveloper | Executed Phases I-1–I-4; smoke tests PASS; @DocsReviewer PASS; @IntegrationChecker GO (43 tests, 0 violations); 4 split commits; opened PR #16 targeting develop. Deviation: removed `notebooks/` from `.gitignore` (generic template entry was blocking git add on tracked files — recorded in repo lessons). |
