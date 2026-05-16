@@ -758,12 +758,12 @@ plt.show()
 
 | # | Phase | Owner | Status | Evidence / Notes |
 |---|-------|-------|--------|------------------|
-| 1 | Phase I-1 — `git mv nb/ notebooks/` | @ProjectDeveloper | not-started | |
-| 2 | Phase I-2 — config file updates | @ProjectDeveloper → @LinterSpecialist | not-started | |
-| 3 | Phase I-3 — rewrite `analysis.ipynb` | @ProjectDeveloper → @DocsReviewer | not-started | |
-| 4 | Phase I-4 — rewrite `results.ipynb` | @ProjectDeveloper → @DocsReviewer | not-started | |
-| 5 | Documentation pass | @DocsReviewer | not-started | |
-| 6 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | not-started | |
+| 1 | Phase I-1 — `git mv nb/ notebooks/` | @ProjectDeveloper | done | `renamed: nb/analysis.ipynb -> notebooks/analysis.ipynb`, `renamed: nb/results.ipynb -> notebooks/results.ipynb` — two renamed entries, no deleted/new-file entries |
+| 2 | Phase I-2 — config file updates | @ProjectDeveloper → @LinterSpecialist | done | Diffs 1–4 applied; `tach check` ✅, `pyright src/` 0 errors; `grep '"nb"' tach.toml pyrightconfig.json .dockerignore` empty |
+| 3 | Phase I-3 — rewrite `analysis.ipynb` | @ProjectDeveloper → @DocsReviewer | done | 14 cells written per Diff 5; no raw paths, no inline defs, `ingest(force=True)` present, `cfg.directory_output` used |
+| 4 | Phase I-4 — rewrite `results.ipynb` | @ProjectDeveloper → @DocsReviewer | done | 10 cells written per Diff 6; no raw paths, `model("2019-10-01", 30, None)` call present, `result["drift"]` correct key used, `cfg.directory_output` used |
+| 5 | Documentation pass | @DocsReviewer | done | PASS — both notebooks, all 5 checks (headings, no raw paths, API usage, CWD guard order, prerequisites note) |
+| 6 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | GO — G0–G6 all pass; 43 tests passed, 0 ruff/pyright/tach violations |
 | 7 | MR preparation | @ProjectDeveloper | not-started | |
 
 **Effort summary:** S×2, M×2 — total estimated complexity: Small-Medium. No XL phases.
