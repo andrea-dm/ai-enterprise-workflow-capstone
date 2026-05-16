@@ -1,16 +1,55 @@
 """Flask REST API exposing the forecasting and logging endpoints."""
 
+import json
 import os
+from pathlib import Path
 
-import pandas as pd
 from flask import Flask, jsonify, request
 from flask.typing import ResponseReturnValue
 
-from ai_enterprise_workflow.core.config import DIRECTORY_LOGS
+from ai_enterprise_workflow.core.config import cfg
 from ai_enterprise_workflow.forecasting.arima import model
 
 app = Flask(__name__)
 app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "0") == "1"
+
+# Module-level alias
+DIRECTORY_LOGS: Path = cfg.directory_logs
+
+
+def _read_log_events(
+    log_dir: Path,
+    event_type: str,
+) -> list[dict[str, object]]:
+    """Read JSONL log events filtered by event type.
+
+    Args:
+        log_dir: Directory containing the ``events.jsonl`` log file.
+        event_type: Value of the ``event`` field used to filter records.
+
+    Returns:
+        List of log-record dicts whose ``event`` field matches
+        ``event_type``. Malformed lines are silently skipped.
+
+    Notes:
+        Reads ``events.jsonl`` from disk via :meth:`~pathlib.Path.read_text`.
+        Returns an empty list without raising if the file does not exist.
+    """
+    log_file = log_dir / "events.jsonl"
+    if not log_file.exists():
+        return []
+    records: list[dict[str, object]] = []
+    for raw_line in log_file.read_text().splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+        try:
+            record: dict[str, object] = json.loads(stripped)
+        except json.JSONDecodeError:
+            continue
+        if record.get("event") == event_type:
+            records.append(record)
+    return records
 
 
 @app.route("/healthz", methods=["GET"])
@@ -61,13 +100,19 @@ def predict() -> ResponseReturnValue:
     if "date" in request.args:
         date = request.args["date"]
     else:
-        return "Error: No date parameter was provided."
+        return jsonify({"error": "No date parameter was provided."}), 400
     # Check country parameter in request
     country = request.args.get("country", None)
     # Check duration parameter in request
     if "duration" in request.args:
-        duration = request.args["duration"]
-        duration = 30 if duration == "" else int(duration)
+        _duration_raw = request.args["duration"]
+        if _duration_raw == "":
+            duration = 30
+        else:
+            try:
+                duration = int(_duration_raw)
+            except ValueError:
+                return jsonify({"error": "duration must be an integer."}), 422
     else:
         duration = 30
     # Call model with parameters
@@ -91,12 +136,10 @@ def logs() -> ResponseReturnValue:
 
     Examples:
         >>> from unittest.mock import patch
-        >>> import pandas as pd
         >>> from ai_enterprise_workflow.service.api import app
         >>> client = app.test_client()
-        >>> target = "ai_enterprise_workflow.service.api.pd.read_csv"
-        >>> mock_df = pd.DataFrame({"col": [1]})
-        >>> with patch(target, return_value=mock_df):
+        >>> target = "ai_enterprise_workflow.service.api._read_log_events"
+        >>> with patch(target, return_value=[{"event": "predict"}]):
         ...     r = client.post("/logs?type=predict")
         >>> "data" in r.get_json()
         True
@@ -104,13 +147,9 @@ def logs() -> ResponseReturnValue:
     if "type" in request.args:
         log_type = request.args["type"]
     else:
-        return "Error: No type parameter was provided."
-    if log_type == "ingest":
-        logs = pd.read_csv(DIRECTORY_LOGS + "ingest.csv").to_dict()
-    elif log_type == "train":
-        logs = pd.read_csv(DIRECTORY_LOGS + "train.csv").to_dict()
-    elif log_type == "predict":
-        logs = pd.read_csv(DIRECTORY_LOGS + "predict.csv").to_dict()
+        return jsonify({"error": "No type parameter was provided."}), 400
+    if log_type in ("ingest", "train", "predict"):
+        log_records = _read_log_events(DIRECTORY_LOGS, log_type)
     else:
-        return "Error: Invalid type parameter was provided."
-    return jsonify({"data": logs})
+        return jsonify({"error": "Invalid type parameter was provided."}), 422
+    return jsonify({"data": log_records})
