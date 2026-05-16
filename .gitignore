@@ -211,6 +211,9 @@ data/*
 out/*
 models/
 
+# Manifests (local design artefacts — not tracked)
+manifests/*.md
+
 # Test files
 rules/temp.json
 
