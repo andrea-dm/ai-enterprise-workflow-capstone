@@ -45,7 +45,8 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ["."]
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
