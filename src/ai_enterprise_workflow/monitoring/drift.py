@@ -7,7 +7,7 @@ import numpy.typing as npt
 from scipy.stats import wasserstein_distance  # type: ignore[import-untyped]
 
 
-def get_wasserstain_distance(
+def get_wasserstein_distance(
     data: npt.NDArray[np.floating[Any]],
     batch_size: int = 1000,
     confidence: float = 0.05,
@@ -28,6 +28,13 @@ def get_wasserstain_distance(
         Results are non-deterministic because :func:`numpy.random.choice` is
         used for bootstrap sampling. Set ``numpy.random.seed`` before calling
         if reproducibility is required.
+
+    Examples:
+        >>> import numpy as np
+        >>> data = np.random.randn(100, 2)
+        >>> score = get_wasserstein_distance(data, batch_size=20)
+        >>> isinstance(float(score), float)
+        True
     """
     wasserstein_data = np.zeros(batch_size)
     for batch in range(batch_size):
