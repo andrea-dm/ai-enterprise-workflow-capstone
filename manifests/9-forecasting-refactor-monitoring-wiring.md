@@ -11,9 +11,9 @@ affects:
   - ai_enterprise_workflow.monitoring.drift
   - ai_enterprise_workflow.core.config
 lock: null
-mr: null
-mr_url: null
-status: in-progress
+mr: "#13"
+mr_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/13
+status: in-review
 ---
 
 # decompose forecasting model and wire drift monitoring
@@ -801,7 +801,7 @@ Update 4 mock call sites in `test_api.py` to include `"drift": 0.05`.
 | 8 | Phase F-6 — update test mocks | @ProjectDeveloper → @TestDesigner | done | All 3 mock return values updated to include `"drift": 0.05`; `drift_warning` assertion added; 24 tests pass |
 | 9 | Documentation pass | @DocsReviewer | done | config.py drift_threshold docstring, api.py predict() returns + example, drift.py examples added; ruff+pyright 0 errors |
 | 10 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | GO: G0/G2/G3/G4/G5/G6/lockfile all pass; 24 tests; 0 errors |
-| 11 | MR preparation | @ProjectDeveloper | in-progress | |
+| 11 | MR preparation | @ProjectDeveloper | done | PR #13 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/13 |
 
 **Effort summary:** S×7, M×1 — total complexity: Small-Medium. No XL phases.
 
@@ -849,3 +849,4 @@ To finalize after merge: `@ProjectDeveloper finalize manifests/9-forecasting-ref
 |---|---|---|
 | 2026-05-16T12:00:00Z | @IssueTracker | Initial scaffold — issue #9, branch created, manifest bootstrapped |
 | 2026-05-16T12:30:00Z | @ProjectArchitect | Added Execution context, Decisions log (D1–D6), Detailed action plan (Phases E-1, E-2, F-1–F-6 with effort tags and Execution recipes), Proposed diffs (Diffs 1–6), Failure playbook, Roadmap, Acceptance criteria mirror, Handover. |
+| 2026-05-16T00:00:00Z | @ProjectDeveloper | Executed phases E-1, E-2, F-1–F-6; @DocsReviewer docs pass; @IntegrationChecker GO (24 tests, 0 ruff/pyright/tach errors); 6 split commits; opened PR #13 targeting develop. |
