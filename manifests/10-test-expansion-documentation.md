@@ -3,7 +3,7 @@ manifest_version: 1
 branch: 10-test-expansion-documentation
 issue: 10
 issue_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/issues/10
-status: in-review
+status: done
 scope: "tests, docs, py.typed"
 tests: "tests/ingestion/, tests/monitoring/, tests/cli/, tests/conftest.py"
 affects:
@@ -968,7 +968,7 @@ class TestCli:
 | 8 | Phase H-4 — CHANGELOG 0.2.0 | @ProjectDeveloper → @DocsReviewer | done | `## [0.2.0]` prepended above `## [Unreleased]` |
 | 9 | Documentation pass | @DocsReviewer | done | PASS — test docstrings added to 9+5 methods; docs/api_reference.md comment cleanup; mkdocs build 0 errors |
 | 10 | Integration gate | @IntegrationChecker (`docs_mode=skip`) | done | GO — G0/G2/G3/G4/G5/G6/lockfile all pass; 43 tests; 0 errors |
-| 11 | MR preparation | @ProjectDeveloper | done | PR #14 opened: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/pull/14 |
+| 11 | MR preparation | @ProjectDeveloper | done | PR #14 merged 2026-05-16T16:57:36Z; issue #10 closed; local branch deleted |
 
 **Effort summary:** S×6, M×2 — total complexity: Small-Medium. No XL phases.
 
@@ -1021,3 +1021,4 @@ To finalize after merge: `@ProjectDeveloper finalize manifests/10-test-expansion
 | 2026-05-16T12:00:00Z | @IssueTracker | Initial scaffold — issue #10, branch created, manifest bootstrapped |
 | 2026-05-16T12:30:00Z | @ProjectArchitect | Added Execution context, Decisions log (D1–D5), Detailed action plan (Phases G-1–G-4, H-1–H-4 with effort tags and Execution recipes), Proposed diffs (Diffs 1–12), Failure playbook, Roadmap, Acceptance criteria mirror, Handover. |
 | 2026-05-16T18:00:00Z | @ProjectDeveloper | Executed phases G-1 through H-4; all 14 acceptance criteria ticked; @DocsReviewer PASS; @IntegrationChecker GO (43 tests, 0 errors); 7 split commits; opened PR #14 targeting develop. |
+| 2026-05-16T17:00:00Z | @ProjectDeveloper | Stage 7 finalization: PR #14 merged (2026-05-16T16:57:36Z) verified via gh CLI; develop pulled and synced; local branch deleted; issue #10 closed. Status set to done. |
