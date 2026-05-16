@@ -1,6 +1,6 @@
 # API Reference
 
-<!-- internal: cli -->
+::: ai_enterprise_workflow.cli
 
 ::: ai_enterprise_workflow.core.config
     options:

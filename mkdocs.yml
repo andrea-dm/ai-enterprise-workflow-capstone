@@ -31,9 +31,9 @@ plugins:
           paths: ["src"]
           options:
             docstring_style: google
-            members: false
-            show_docstring_examples: false
-            show_signature: false
+            members: true
+            show_docstring_examples: true
+            show_signature: true
             show_source: false
             show_root_heading: true
             members_order: source
