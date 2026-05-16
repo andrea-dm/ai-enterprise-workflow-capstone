@@ -3,7 +3,7 @@ manifest_version: 1
 branch: 15-notebooks-rename-api-rewire
 issue: 15
 issue_url: https://github.com/andrea-dm/ai-enterprise-workflow-capstone/issues/15
-status: design
+status: in-progress
 scope: "notebooks, config"
 affects:
   - notebooks/analysis.ipynb
@@ -465,9 +465,9 @@ Replace all 7 original cells with 10 new cells that call `model()` and display t
 @@ -93,7 +93,7 @@
  - Runtime + dev dependencies rationalized to capstone's actual stack
    (`flask`, `pandas`, `numpy`, `scipy`, `statsmodels`, `tqdm`, `matplotlib`).
- 
+
  ### Notes
- 
+
 -- Notebooks under `nb/` required no edits (verified zero `from src` refs).
 +- Notebooks under `notebooks/` required no edits at the time of the slice-1 restructure (verified zero `from src` refs); rewired to use the public API in issue #15.
  - `monitoring/drift.py` retained verbatim; runtime wiring deferred to a later slice.
