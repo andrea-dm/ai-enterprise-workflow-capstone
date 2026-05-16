@@ -3,7 +3,6 @@
 from collections.abc import Generator
 from unittest.mock import patch
 
-import pandas as pd
 import pytest
 from flask.testing import FlaskClient
 from hypothesis import HealthCheck, given, settings
@@ -12,7 +11,7 @@ from hypothesis import strategies as st
 from ai_enterprise_workflow.service.api import app
 
 _MODEL_TARGET = "ai_enterprise_workflow.service.api.model"
-_CSV_TARGET = "ai_enterprise_workflow.service.api.pd.read_csv"
+_READ_LOG_TARGET = "ai_enterprise_workflow.service.api._read_log_events"
 
 
 @pytest.fixture
@@ -65,19 +64,19 @@ class TestApi:
         def test_predict_missing_date_returns_error_string(
             self, flask_client: FlaskClient
         ) -> None:
-            """POST /predict without date returns a plain-text error response."""
+            """POST /predict without date returns HTTP 400 with JSON error body."""
             # Act
             response = flask_client.post("/predict")
             # Assert
-            assert "Error" in response.data.decode()
-            assert response.get_json() is None
+            assert response.status_code == 400
+            assert response.get_json() == {"error": "No date parameter was provided."}
 
         def test_logs_valid_type_returns_data_key(
             self, flask_client: FlaskClient
         ) -> None:
             """POST /logs with valid type returns JSON with 'data' key."""
             # Arrange
-            with patch(_CSV_TARGET, return_value=pd.DataFrame({"col": [1]})):
+            with patch(_READ_LOG_TARGET, return_value=[{"event": "predict"}]):
                 # Act
                 response = flask_client.post("/logs?type=predict")
             # Assert
@@ -86,22 +85,24 @@ class TestApi:
         def test_logs_missing_type_returns_error_string(
             self, flask_client: FlaskClient
         ) -> None:
-            """POST /logs without type returns a plain-text error response."""
+            """POST /logs without type returns HTTP 400 with JSON error body."""
             # Act
             response = flask_client.post("/logs")
             # Assert
-            assert "Error" in response.data.decode()
-            assert response.get_json() is None
+            assert response.status_code == 400
+            assert response.get_json() == {"error": "No type parameter was provided."}
 
         def test_logs_invalid_type_returns_error_string(
             self, flask_client: FlaskClient
         ) -> None:
-            """POST /logs with unknown type returns a plain-text error response."""
+            """POST /logs with unknown type returns HTTP 422 with JSON error body."""
             # Act
             response = flask_client.post("/logs?type=unknown")
             # Assert
-            assert "Error" in response.data.decode()
-            assert response.get_json() is None
+            assert response.status_code == 422
+            assert response.get_json() == {
+                "error": "Invalid type parameter was provided."
+            }
 
         def test_healthz_returns_ok(self, flask_client: FlaskClient) -> None:
             """GET /healthz returns HTTP 200 with JSON body ``{"status": "ok"}``."""
@@ -137,7 +138,7 @@ class TestApi:
         ) -> None:
             """POST /logs returns JSON with 'data' key for every registered log type."""
             # Arrange
-            with patch(_CSV_TARGET, return_value=pd.DataFrame({"col": [1]})):
+            with patch(_READ_LOG_TARGET, return_value=[]):
                 # Act
                 response = flask_client.post(f"/logs?type={log_type}")
             # Assert
