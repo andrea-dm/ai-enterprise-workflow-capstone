@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] — Slices A–H: foundation upgrade, forecasting refactor, test expansion
+
+### Added
+
+- **Slice A:** `AppSettings(BaseSettings)` typed configuration with env-override
+  support via `pydantic-settings`; all directory/URL fields typed as `Path`/`str`;
+  `drift_threshold: float = 0.1` added.
+- **Slice B:** Structured JSONL logging via `core/log_events.py` replacing the
+  CSV-based `core/logging.py`; `get_logger`, `setup_logging`, `log_ingest`,
+  `log_train`, `log_predict` helpers.
+- **Slice C:** Docker and Flask production hardening — non-root user, Gunicorn
+  entrypoint, JSON error responses (400/422), `/readyz` health endpoint.
+- **Slice D:** CLI fully wired via `argparse` (`ingest`, `train`, `predict`,
+  `serve` subcommands); `[project.scripts]` entrypoint registered;
+  `create_app` factory for test isolation.
+- **Slice E:** `forecasting/arima.py` refactored — `train_ARIMA_model` and
+  `train_SARIMA_model` renamed to snake_case; `model()` decomposed into
+  `_load_or_train`, `_resolve_revenue`, `_run_predictions`; `# noqa: PLR0912`
+  suppression removed.
+- **Slice F:** Monitoring wired into forecasting — `get_wasserstein_distance`
+  typo fixed; `forecasting → monitoring` tach dependency added; `model()`
+  now returns `{"arima": float, "sarima": float, "drift": float}`;
+  `/predict` response adds `drift_warning: bool`.
+- **Slice G:** Test coverage expanded — `tests/ingestion/` (9 tests),
+  `tests/monitoring/` (3 tests), `tests/cli/` (5 tests), shared `flask_client`
+  fixture migrated to `tests/conftest.py`.
+- **Slice H:** `py.typed` PEP 561 marker; `mkdocstrings` autodoc enabled
+  (`members`, examples, signatures); `docs/api_reference.md` updated with
+  `ai_enterprise_workflow.cli` directive (7 modules total).
+
 ## [Unreleased] — Slice 2: pyright strict-mode compliance
 
 ### Changed
