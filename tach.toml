@@ -5,12 +5,11 @@
 # import higher. `core` is the foundation and is allowed no internal deps.
 #
 #   cli
-#    └─ tasks
-#        ├─ audit       ─┐
-#        ├─ ingestion   ─┤── may use resources, retrieval, core
-#        └─ resources   ─┴── composes embedder/retriever onto ML lifecycles
-#                       └─ retrieval
-#                           └─ core
+#    └─ service
+#        └─ forecasting
+#            └─ ingestion
+#                └─ core
+#   monitoring (orphan today; declared with only `core` as a dep)
 #
 # Run:  uv run tach check
 # CI-style lint env: uv sync --locked --only-group lint --no-install-project
@@ -19,67 +18,54 @@
 source_roots = ["src"]
 exclude = [
     "tests",
-    "debug",
-    "workbench",
-    "scripts",
     "notebooks",
-    "backup",
     "**/__pycache__",
 ]
 
 # ---------------------------------------------------------------------------
-# Module declarations (one per top-level subpackage of `carbon_pledges`).
+# Module declarations (one per top-level subpackage of `ai_enterprise_workflow`).
 # `depends_on` lists the ONLY internal modules each may import from.
 # ---------------------------------------------------------------------------
 
 [[modules]]
-path = "carbon_pledges.cli"
+path = "ai_enterprise_workflow.cli"
 depends_on = [
-    "carbon_pledges.core",
-    "carbon_pledges.tasks",
+    "ai_enterprise_workflow.core",
+    "ai_enterprise_workflow.service",
+    "ai_enterprise_workflow.ingestion",
+    "ai_enterprise_workflow.forecasting",
 ]
 
 [[modules]]
-path = "carbon_pledges.tasks"
+path = "ai_enterprise_workflow.service"
 depends_on = [
-    "carbon_pledges.core",
-    "carbon_pledges.audit",
-    "carbon_pledges.ingestion",
-    "carbon_pledges.resources",
-    "carbon_pledges.retrieval",
+    "ai_enterprise_workflow.core",
+    "ai_enterprise_workflow.forecasting",
 ]
 
 [[modules]]
-path = "carbon_pledges.audit"
+path = "ai_enterprise_workflow.forecasting"
 depends_on = [
-    "carbon_pledges.core",
-    "carbon_pledges.resources",
-    "carbon_pledges.retrieval",
+    "ai_enterprise_workflow.core",
+    "ai_enterprise_workflow.ingestion",
+    "ai_enterprise_workflow.monitoring",
 ]
 
 [[modules]]
-path = "carbon_pledges.ingestion"
+path = "ai_enterprise_workflow.ingestion"
 depends_on = [
-    "carbon_pledges.core",
-    "carbon_pledges.resources",
-    "carbon_pledges.retrieval",
+    "ai_enterprise_workflow.core",
 ]
 
-# `resources` composes ML lifecycles on top of retrieval primitives.
+# `monitoring` is an orphan today (zero callers); declared with only `core`
+# as a dep so future wiring (Slice 6+) is constrained.
 [[modules]]
-path = "carbon_pledges.resources"
+path = "ai_enterprise_workflow.monitoring"
 depends_on = [
-    "carbon_pledges.core",
-    "carbon_pledges.retrieval",
-]
-
-[[modules]]
-path = "carbon_pledges.retrieval"
-depends_on = [
-    "carbon_pledges.core",
+    "ai_enterprise_workflow.core",
 ]
 
 # `core` is the foundation: no internal dependencies allowed.
 [[modules]]
-path = "carbon_pledges.core"
+path = "ai_enterprise_workflow.core"
 depends_on = []

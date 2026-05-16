@@ -209,6 +209,7 @@ metadata/
 # Data
 data/*
 out/*
+models/
 
 # Test files
 rules/temp.json
@@ -246,7 +247,6 @@ answers/
 workbench/
 checkpoints/
 outputs/
-notebooks/
 backup/
 eval/*
 !eval/README.md
