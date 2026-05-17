@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.2] — 2026-05-17
+
+### Changed
+
+- `notebooks/results.ipynb`: add a lag-30 seasonal naive baseline to
+  the predictions-vs-actuals comparison plot.
+
+### Fixed
+
+- `ai_enterprise_workflow.__version__`: align the package version marker
+  with the release metadata.
+
 ## [0.2.1] — 2026-05-16
 
 ### Fixed
